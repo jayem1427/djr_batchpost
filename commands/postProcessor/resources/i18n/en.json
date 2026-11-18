@@ -216,6 +216,10 @@
       "This document has no Manufacture (CAM) data to post.": "This document has no Manufacture (CAM) data to post.",
       "No usable NC Program found.<p>Create an NC Program (with at least one operation) and pick your post processor, then try again.": "No usable NC Program found.<p>Create an NC Program (with at least one operation) and pick your post processor, then try again.",
       "The NC Program '{name}' has no post processor.<p>Edit the NC Program, pick your .cps post processor, then try again.": "The NC Program '{name}' has no post processor.<p>Edit the NC Program, pick your .cps post processor, then try again.",
-      "No setups to post. Unsuppress a setup or fix its errors, then try again.": "No setups to post. Unsuppress a setup or fix its errors, then try again."
+      "No setups to post. Unsuppress a setup or fix its errors, then try again.": "No setups to post. Unsuppress a setup or fix its errors, then try again.",
+      "Couldn't find the post processor '{name}' you used last time in your post libraries.<p>Create an NC Program with your post processor in this document, then try again.": "Couldn't find the post processor '{name}' you used last time in your post libraries.<p>Create an NC Program with your post processor in this document, then try again.",
+      "This document has no NC Program yet, and I don't know your post processor yet.<p>Create an NC Program once with your post processor and post with DJR Batch Post. After that, Post Combined creates the NC Program for you in any document.": "This document has no NC Program yet, and I don't know your post processor yet.<p>Create an NC Program once with your post processor and post with DJR Batch Post. After that, Post Combined creates the NC Program for you in any document.",
+      "Created an NC Program, but it isn't ready to post. Open DJR Batch Post to check it.": "Created an NC Program, but it isn't ready to post. Open DJR Batch Post to check it.",
+      "Couldn't find the right-clicked setup. Try again.": "Couldn't find the right-clicked setup. Try again."
     }
 }

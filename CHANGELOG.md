@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.1.0 — 2026-11-18
+
+Right-click a setup and get G-code, even in a document with no NC Program.
+
+### New
+- **Right-click a setup → Post Combined (DJR).** Posts exactly the right-clicked setup(s) into one file. A single setup is written to a file named after it.
+- **Automatic NC Program.** When a document has no usable NC Program, Post Combined creates one covering every setup. It uses the post-processor and output folder remembered from your last successful post. If you've never posted, it uses the only post in your own library, when there is exactly one.
+
+### Fixed
+- Posting overwrote the NC Program's operation list with the last operation posted, and never restored it. Your NC Program now keeps its operations.
+
 ## v1.0.0 — 2026-11-18
 
 The project is now **djr_batchpost**, and posting a combined file takes one click.

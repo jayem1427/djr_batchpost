@@ -19,3 +19,8 @@ QUICK_CMD_ID = f'{COMPANY_NAME}_{ADDIN_NAME}_postCombined'
 QUICK_CMD_NAME = 'Post Combined'
 QUICK_CMD_DESCRIPTION = ('One click: post every operation in the selected setups (or all setups) into one combined G-code file, '
                          'using the NC Program, output folder and options last used in DJR Batch Post.')
+
+# Same action from a setup's right-click menu (posts the right-clicked setups)
+QUICK_CTX_CMD_ID = f'{COMPANY_NAME}_{ADDIN_NAME}_postCombinedSetup'
+QUICK_CTX_CMD_NAME = 'Post Combined (DJR)'
+QUICK_CTX_CMD_DESCRIPTION = 'Post the right-clicked setup(s) into one G-code file. One setup is named after the setup.'

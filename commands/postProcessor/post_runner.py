@@ -146,6 +146,8 @@ def run_with_overwrite_prompt(ui) -> Optional[list[Path]]:
 
 def report_success(ui, outputs: list[Path]) -> None:
     """Tell the user what was written and offer to open the folder."""
+    from . import auto_program
+    auto_program.remember(Programs.Current)  # so new documents can get an NC Program automatically
     folder = common_folder(outputs) or Programs.Current.GetOutputFolder()
     if outputs:
         msg = Strings("Wrote {count} file(s) to:<br>{folder}<p>{files}<p>Open the folder?").format(

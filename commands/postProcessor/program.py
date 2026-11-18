@@ -133,10 +133,17 @@ class Program():
         outputFolder = self.GetOutputFolder()
         fileName = self.fileName
         name = self.Parameters.Get(Parameters.NAME)
+        # PostProcess() points the NC Program at one operation group at a
+        # time; put the user's operation list back afterwards.
+        originalOperations = list(self._program.operations)
 
         try:
             Setups.Parse(tmpPath)
         finally:
+            try:
+                self._program.operations = originalOperations
+            except Exception:
+                pass
             self.SetOutputFolder(outputFolder)
             self.Parameters.Set(Parameters.FILE_NAME, fileName)
             self.Parameters.Set(Parameters.NAME, name)

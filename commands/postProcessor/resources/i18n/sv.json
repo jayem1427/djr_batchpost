@@ -236,6 +236,10 @@
       "This document has no Manufacture (CAM) data to post.": "Dokumentet har inga Manufacture-data (CAM) att efterbehandla.",
       "No usable NC Program found.<p>Create an NC Program (with at least one operation) and pick your post processor, then try again.": "Inget användbart NC-program hittades.<p>Skapa ett NC-program (med minst en operation) och välj din postprocessor, försök sedan igen.",
       "The NC Program '{name}' has no post processor.<p>Edit the NC Program, pick your .cps post processor, then try again.": "NC-programmet '{name}' har ingen postprocessor.<p>Redigera NC-programmet, välj din .cps-postprocessor och försök igen.",
-      "No setups to post. Unsuppress a setup or fix its errors, then try again.": "Inga setups att efterbehandla. Aktivera en setup eller åtgärda dess fel och försök igen."
+      "No setups to post. Unsuppress a setup or fix its errors, then try again.": "Inga setups att efterbehandla. Aktivera en setup eller åtgärda dess fel och försök igen.",
+      "Couldn't find the post processor '{name}' you used last time in your post libraries.<p>Create an NC Program with your post processor in this document, then try again.": "Hittade inte postprocessorn '{name}' som du använde senast i dina postbibliotek.<p>Skapa ett NC-program med din postprocessor i det här dokumentet och försök igen.",
+      "This document has no NC Program yet, and I don't know your post processor yet.<p>Create an NC Program once with your post processor and post with DJR Batch Post. After that, Post Combined creates the NC Program for you in any document.": "Dokumentet har inget NC-program ännu, och din postprocessor är inte känd ännu.<p>Skapa ett NC-program en gång med din postprocessor och efterbehandla med DJR Batch Post. Därefter skapar Post Combined NC-programmet åt dig i alla dokument.",
+      "Created an NC Program, but it isn't ready to post. Open DJR Batch Post to check it.": "Ett NC-program skapades men är inte redo. Öppna DJR Batch Post och kontrollera det.",
+      "Couldn't find the right-clicked setup. Try again.": "Hittade inte den högerklickade setupen. Försök igen."
     }
 }

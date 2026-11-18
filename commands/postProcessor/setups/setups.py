@@ -41,6 +41,25 @@ class Setups(SetupsHeader, SetupsBody, SetupsTail, metaclass=_SetupsMeta):
         cls._items: List[Setup] = [Setup(setup, index, noneSelected) for index, setup in enumerate(setups)]
 
     @classmethod
+    def SelectOnly(cls, fusionSetups) -> int:
+        """Select exactly these Fusion setups (e.g. the ones right-clicked).
+        Returns how many matched."""
+        wanted = list(fusionSetups)
+        count = 0
+        for setup in cls._items:
+            hit = False
+            for other in wanted:
+                try:
+                    hit = setup._setup == other
+                except Exception:
+                    hit = False
+                if hit:
+                    break
+            setup.Select(hit)
+            count += 1 if hit else 0
+        return count
+
+    @classmethod
     def Parse(cls, tmpPath: Path) -> None:
         for setup in cls.selected:
             setup.Parse(tmpPath)

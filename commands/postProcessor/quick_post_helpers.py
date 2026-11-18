@@ -93,3 +93,10 @@ def open_in_file_browser(path: Path, platform: str = sys.platform) -> bool:
         return True
     except Exception:
         return False
+
+
+def program_file_name(document_name: str) -> str:
+    """'Bracket v12' -> 'Bracket' (Fusion appends the version to doc names)."""
+    import re
+    name = re.sub(r"\s+v\d+$", "", (document_name or "").strip())
+    return name or "program"

@@ -32,14 +32,14 @@ It also helps on paid Fusion:
 
 1. **Install.** Download `djr_batchpost-vX.Y.Z.zip` from the [latest release](https://github.com/jayem1427/djr_batchpost/releases/latest) and unzip it. You get a folder named `djr_batchpost`.
 2. In Fusion, open **Utilities → Add-Ins → Scripts and Add-Ins**, click **+ → Script or add-in from device**, and pick that `djr_batchpost` folder. Click **Run** and tick **Run on startup**.
-3. In the **Manufacture** workspace, create **one NC Program**, pick your post-processor (`.cps`), and give it at least one operation. Only the post-processor, output folder and file name are used from it.
-4. Click **DJR Batch Post** once, check the output folder and file name on the *Output Options* tab, and click **Process**.
-5. From then on, use **Post Combined** after every CAM change: one click and you get one file.
+3. **Right-click a setup → Post Combined (DJR)**, or click **Post Combined** in the toolbar. You get G-code.
+
+The very first time, the add-in needs to learn your post-processor. If you only have one post in your own post library, it uses that automatically. Otherwise, post once from a document that has an NC Program with your post selected (with either button). From then on, documents without an NC Program get one created automatically, with that post and the same output folder.
 
 > [!IMPORTANT]
 > The add-in folder **must** be named `djr_batchpost`, because Fusion looks for `djr_batchpost/djr_batchpost.py`. If you clone with git, clone into that folder name (see [Install from source](#install-from-source)).
 
-## The two buttons
+## The two buttons and the right-click menu
 
 Both buttons are in the **Actions** panel of the Manufacture workspace, next to Fusion's own Post Process button.
 
@@ -47,8 +47,11 @@ Both buttons are in the **Actions** panel of the Manufacture workspace, next to 
 |---|---|---|
 | <img src="resources/branding/icon.svg" width="32"> | **DJR Batch Post** | Opens the full dialog. Here you choose the NC Program, setups, grouping, G-code options and output. Your choices are saved in the document. |
 | <img src="resources/branding/icon-quick.svg" width="32"> | **Post Combined** | Posts with no dialog. It always writes **one combined file** and uses the NC Program, folder, file name and G-code options last saved by the dialog. |
+| | **Right-click a setup → Post Combined (DJR)** | Same as Post Combined, but posts exactly the setup(s) you right-clicked. **One setup is written to a file named after the setup** (e.g. `Top_side.ngc`). Several setups go into the NC Program's file name. |
 
 **Which setups does Post Combined post?** If you have setups selected in the CAM browser, only those (Ctrl/Cmd-click to select several). With nothing selected, it posts every setup that isn't suppressed or in error.
+
+**No NC Program in the document?** Post Combined creates one called *DJR Batch Post* that covers every setup. It uses the post-processor and output folder from your last successful post, and names the file after the document (`Bracket v12` → `Bracket.ngc`). If that post can't be found in your post libraries, it tells you instead of guessing. Your own libraries (Local, Cloud, Network) are searched before Fusion's built-in posts. The post is remembered in `commands/postProcessor/settings/remembered_post.json` inside the add-in folder; delete that file to make it forget.
 
 **What Post Combined never does:** it never clears the output folder, and it never changes your saved grouping. If the target file already exists, it asks before overwriting.
 
@@ -69,7 +72,7 @@ merge: one header ─► tool comments ─► bodies (+ tool changes, A-axis mov
 <output folder>/<file name>.<post extension>
 ```
 
-The header of every file shows the version that wrote it: `(Generated with DJR Batch Post version 1.0.0)`.
+The header of every file shows the version that wrote it: `(Generated with DJR Batch Post version 1.1.0)`.
 
 ## Options reference
 
@@ -142,10 +145,10 @@ The tests stub the Fusion `adsk` API, so they run anywhere. They cover the parse
 **Releasing:** bump `"version"` in `djr_batchpost.manifest` and `PLUGIN_VERSION` in `config.py`, add a section to `CHANGELOG.md`, then push a tag:
 
 ```bash
-git tag v1.0.0 && git push origin v1.0.0
+git tag v1.1.0 && git push origin v1.1.0
 ```
 
-The *Release* workflow runs the tests, builds `djr_batchpost-v1.0.0.zip` with `tools/build_release.py`, and publishes a GitHub release with the changelog section as its notes. To build the zip locally, run `python tools/build_release.py` (it writes to `dist/`).
+The *Release* workflow runs the tests, builds `djr_batchpost-v1.1.0.zip` with `tools/build_release.py`, and publishes a GitHub release with the changelog section as its notes. To build the zip locally, run `python tools/build_release.py` (it writes to `dist/`).
 
 ### Layout
 
