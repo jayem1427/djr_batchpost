@@ -9,6 +9,7 @@ Right-click a setup and get G-code, even in a document with no NC Program.
 - **Automatic NC Program.** When a document has no usable NC Program, Post Combined creates one covering every setup. It uses the post-processor and output folder remembered from your last successful post. If you've never posted, it uses the only post in your own library, when there is exactly one.
 
 ### Fixed
+- Posts that don't end with `M30` (e.g. MillenniumOS, which ends with `M5.9`/`M0`) were reported as "output file was not created". A stable output file now counts as complete, and the add-in finds the file Fusion actually wrote. (From the unmerged `cursor/4th-axis-without-machine-d9ab` branch.)
 - Posting overwrote the NC Program's operation list with the last operation posted, and never restored it. Your NC Program now keeps its operations.
 
 ## v1.0.0 — 2026-11-18
