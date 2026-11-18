@@ -49,6 +49,10 @@ Both buttons are in the **Actions** panel of the Manufacture workspace, next to 
 | <img src="resources/branding/icon-quick.svg" width="32"> | **Post Combined** | Posts with no dialog. It always writes **one combined file** and uses the NC Program, folder, file name and G-code options last saved by the dialog. |
 | | **Right-click a setup → Post Combined (DJR)** | Same as Post Combined, but posts exactly the setup(s) you right-clicked. **One setup is written to a file named after the setup** (e.g. `Top_side.ngc`). Several setups go into the NC Program's file name. |
 
+<p align="center">
+  <img src="resources/readme/right-click-post-combined.png" alt="Right-click a setup in the CAM browser and choose Post Combined (DJR)" width="720">
+</p>
+
 **Which setups does Post Combined post?** If you have setups selected in the CAM browser, only those (Ctrl/Cmd-click to select several). With nothing selected, it posts every setup that isn't suppressed or in error.
 
 **No NC Program in the document?** Post Combined creates one called *DJR Batch Post* that covers every setup. It uses the post-processor and output folder from your last successful post, and names the file after the document (`Bracket v12` → `Bracket.ngc`). If that post can't be found in your post libraries, it tells you instead of guessing. Your own libraries (Local, Cloud, Network) are searched before Fusion's built-in posts. The post is remembered in `commands/postProcessor/settings/remembered_post.json` inside the add-in folder; delete that file to make it forget.
