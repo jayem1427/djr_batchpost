@@ -30,3 +30,13 @@ def sync_from_command_inputs(inputs) -> None:
     else:
         value = Settings(Settings.RAPID_MOVES_MINIMUM_DISTANCE)
         rapid_moves_minimum_distance = float(value) if value is not None else 20.0
+
+
+def sync_from_settings() -> None:
+    """Load per-run flags from saved settings (used when there is no dialog)."""
+    global restore_rapid_moves, rapid_moves_minimum_distance
+    from .settings.settings import Settings
+
+    restore_rapid_moves = bool(Settings(Settings.RESTORE_RAPID_MOVES))
+    value = Settings(Settings.RAPID_MOVES_MINIMUM_DISTANCE)
+    rapid_moves_minimum_distance = float(value) if value is not None else 20.0

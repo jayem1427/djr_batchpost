@@ -223,5 +223,19 @@
   "TOOLTIP TEXT: Save as default settings": "Spara nuvarande dialoginställningar som standard för nya dokument.",
 
   "Process": "Starta",
-  "Close": "Stäng"
+  "Close": "Stäng",
+
+  "post_combined": {
+      "__meta__": {
+            "description": "Post Combined button and completion messages."
+          },
+      "Overwrite it?": "Skriva över den?",
+      "{path} already exists.": "{path} finns redan.",
+      "Wrote {count} file(s) to:<br>{folder}<p>{files}<p>Open the folder?": "Skrev {count} fil(er) till:<br>{folder}<p>{files}<p>Öppna mappen?",
+      "Posting finished. Output folder:<br>{folder}<p>Open the folder?": "Efterbehandlingen är klar. Utdatamapp:<br>{folder}<p>Öppna mappen?",
+      "This document has no Manufacture (CAM) data to post.": "Dokumentet har inga Manufacture-data (CAM) att efterbehandla.",
+      "No usable NC Program found.<p>Create an NC Program (with at least one operation) and pick your post processor, then try again.": "Inget användbart NC-program hittades.<p>Skapa ett NC-program (med minst en operation) och välj din postprocessor, försök sedan igen.",
+      "The NC Program '{name}' has no post processor.<p>Edit the NC Program, pick your .cps post processor, then try again.": "NC-programmet '{name}' har ingen postprocessor.<p>Redigera NC-programmet, välj din .cps-postprocessor och försök igen.",
+      "No setups to post. Unsuppress a setup or fix its errors, then try again.": "Inga setups att efterbehandla. Aktivera en setup eller åtgärda dess fel och försök igen."
+    }
 }

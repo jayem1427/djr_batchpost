@@ -3,6 +3,7 @@ from typing import Optional, TextIO
 
 from ..settings.settings import Settings
 from ..file_modes import FileModes
+from .. import run_report
 from .operation.operation import Operation
 
 class OperationsHeader:
@@ -18,6 +19,7 @@ class OperationsHeader:
             if pathToOpen.exists() and not Settings(Settings.OVERWRITE_FILES):
                 raise FileExistsError(f"File {pathToOpen} already exists and overwrite is not allowed.")
             # Always OVERWRITE on first header as it indcates a new file
+            run_report.record(pathToOpen)
             with pathToOpen.open(FileModes.OVERWRITE) as fileHandler:
                 self._operations[0].WriteHeaderStart(fileHandler)
                 self._lineNumber = self._operations[0].lineNumber
@@ -70,6 +72,7 @@ class OperationsHeader:
             pathToOpen: Path = self._path / f"{operation.fileName}{self._fileExtension}"
             if pathToOpen.exists() and not Settings(Settings.OVERWRITE_FILES):
                 raise FileExistsError(f"File {pathToOpen} already exists and overwrite is not allowed.")
+            run_report.record(pathToOpen)
             with pathToOpen.open(FileModes.OVERWRITE) as fileHandler:
                 if Settings(Settings.OPERATIONS_GROUPING) == Settings.OperationsGroupings.PER_OPERATION:
                     operation.SetLineNumber(0)

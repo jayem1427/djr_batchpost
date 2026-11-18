@@ -1,152 +1,171 @@
-# Batch Post
+<p align="center">
+  <img src="resources/branding/logo.svg" alt="djr_batchpost" width="560">
+</p>
 
-An Autodesk Fusion add-in that **batch post-processes** CAM operations into one or more G-code files.
+<p align="center">
+  An Autodesk Fusion add-in that posts every operation in your setups into <b>one combined G-code file</b>,<br>
+  or one file per setup, per tool, or per operation. Works with any post-processor.
+</p>
 
-It is especially useful on **Fusion Personal**, which cannot normally post multi-tool NC programs in one pass: the add-in posts operations individually through your chosen post-processor, then merges the results.
+<p align="center">
+  <a href="https://github.com/jayem1427/djr_batchpost/releases/latest">Download</a> ·
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#the-two-buttons">The two buttons</a> ·
+  <a href="#options-reference">Options</a> ·
+  <a href="#troubleshooting">Troubleshooting</a> ·
+  <a href="CHANGELOG.md">Changelog</a>
+</p>
 
-Works with **any** Fusion post-processor (LinuxCNC, Mach, Fanuc, custom `.cps`, etc.).
+---
 
-**Version:** `0.9.2` (kept in sync in `Batch Post.manifest` and `config.py`).
+## Why
 
-## Features
-- Output one file per operation, per setup, per setup and tool, or a single combined file
-- Multi-tool programs on Fusion Personal (post per operation, then merge)
-- Optional A-axis rotation between setups for indexed milling
-- Optional restoration of rapid moves (`G1` → `G0` on non-cutting retracts)
-- Combine consecutive operations that use the same tool
-- Configurable header/tail detection, line numbering, and output naming
+**Fusion Personal** can't post a multi-tool program in one go. djr_batchpost posts each operation on its own through your normal post-processor, then stitches the results into a single file with the header, tool changes, and program end in the right places.
 
-## Acknowledgments
+It also helps on paid Fusion:
 
-This project is a generalized fork of the [Makera Community Fusion Plugin](https://github.com/Carvera-Community/CarveraCommunity_FusionPlugin), originally created for the Makera / Carvera community. That work was itself heavily inspired by Tim Paterson’s [PostProcessAll](https://github.com/TimPaterson/Fusion360-Batch-Post).
+- It merges several setups into one program, and can write A-axis moves between them for indexed 4th-axis work.
+- It can restore rapids: Fusion Personal posts retracts as `G1`, and this turns them back into `G0`.
+- It can combine back-to-back operations that use the same tool.
 
-Credit to those authors and communities for the original design and ideas. This fork rebrands the tool as a **machine-agnostic** batch post utility and drops vendor-specific product branding from the UI and docs.
+## Quick start
 
-## Requirements
-- Autodesk Fusion (Personal Edition or paid)
-- A Fusion post-processor for your CNC (`.cps`)
+1. **Install.** Download `djr_batchpost-vX.Y.Z.zip` from the [latest release](https://github.com/jayem1427/djr_batchpost/releases/latest) and unzip it. You get a folder named `djr_batchpost`.
+2. In Fusion, open **Utilities → Add-Ins → Scripts and Add-Ins**, click **+ → Script or add-in from device**, and pick that `djr_batchpost` folder. Click **Run** and tick **Run on startup**.
+3. In the **Manufacture** workspace, create **one NC Program**, pick your post-processor (`.cps`), and give it at least one operation. Only the post-processor, output folder and file name are used from it.
+4. Click **DJR Batch Post** once, check the output folder and file name on the *Output Options* tab, and click **Process**.
+5. From then on, use **Post Combined** after every CAM change: one click and you get one file.
 
-## Installation
-This plugin follows the normal local add-in install procedure for Fusion.
+> [!IMPORTANT]
+> The add-in folder **must** be named `djr_batchpost`, because Fusion looks for `djr_batchpost/djr_batchpost.py`. If you clone with git, clone into that folder name (see [Install from source](#install-from-source)).
 
-1. Clone the repository into a folder of your choice:
+## The two buttons
 
-```bash
-# SSH:
-git clone git@github.com:jayem1427/miniMonster_djr_batch_post.git "Batch Post"
+Both buttons are in the **Actions** panel of the Manufacture workspace, next to Fusion's own Post Process button.
 
-# OR HTTPS:
-git clone https://github.com/jayem1427/miniMonster_djr_batch_post.git "Batch Post"
+| | Button | What it does |
+|---|---|---|
+| <img src="resources/branding/icon.svg" width="32"> | **DJR Batch Post** | Opens the full dialog. Here you choose the NC Program, setups, grouping, G-code options and output. Your choices are saved in the document. |
+| <img src="resources/branding/icon-quick.svg" width="32"> | **Post Combined** | Posts with no dialog. It always writes **one combined file** and uses the NC Program, folder, file name and G-code options last saved by the dialog. |
+
+**Which setups does Post Combined post?** If you have setups selected in the CAM browser, only those (Ctrl/Cmd-click to select several). With nothing selected, it posts every setup that isn't suppressed or in error.
+
+**What Post Combined never does:** it never clears the output folder, and it never changes your saved grouping. If the target file already exists, it asks before overwriting.
+
+When posting finishes, both buttons show the files that were written and offer to open the folder.
+
+### What happens when you post
+
+```
+NC Program (post-processor + output folder + file name)
+        │
+        ▼
+for each selected setup ─► for each operation ─► post through your .cps ─► temp file
+        │
+        ▼
+merge: one header ─► tool comments ─► bodies (+ tool changes, A-axis moves, rapid restore) ─► one tail
+        │
+        ▼
+<output folder>/<file name>.<post extension>
 ```
 
-2. In Fusion: **Utilities → Scripts and Add-Ins…**
-3. Click **+** → **Script or add-in from device**
-4. Select the folder that contains `Batch Post.manifest`
-5. (Optional) Enable **Run on startup**
-6. You should see a new icon in the **Manufacture** workspace (near Setup sheet / Milling)
+The header of every file shows the version that wrote it: `(Generated with DJR Batch Post version 1.0.0)`.
 
-After pulling updates, fully quit and reopen Fusion (or stop/start the add-in) so the new code loads. Confirm the version in the G-code header: `(Generated with Batch Post version 0.9.2)`.
+## Options reference
 
-## Usage
-This utility is **not** a post-processor. You still need an **NC Program** in Fusion that points at your post-processor (and optionally a machine configuration).
+The dialog has four tabs. Each change is saved to the document as you make it. **Save as default settings** stores the current settings as the starting point for new documents.
 
-1. Create an NC Program with the normal Fusion post dialog and select your `.cps` file.
-2. You must select a **post processor** on the NC Program.
-3. A **machine configuration** is optional. Without one, posting uses your post-processor settings only. **A-axis rotation between setups** is written by this add-in from each setup's WCS orientation, so you do not need a 4-axis machine definition. Attach a machine only if you want **ATC slot assignment** in the Tools tab.
-4. Open **Batch Post**, select the NC Program and setups, configure output options, and click **Process**.
+### Input Selection
 
-### NC Program and multi-tool setups
+- **NC Program.** This preselects the program you last used, or else the first program that has a post-processor. The dropdown only lists NC Programs with at least one operation, so it hides empty programs.
+- **Machine.** Optional. A-axis moves are written by this add-in from each setup's WCS, so no 4-axis machine definition is required. If a machine *is* attached and has no A-axis, you get a warning before rotated setups are posted.
+- **Post Processor.** Required.
+- **Setups table.** Check the setups to post. Order matters for A-axis rotation. Origin, X-axis alignment and rotation are shown relative to the first checked setup. Misaligned WCS triggers a warning when you post rather than blocking the setup.
 
-You do **not** need a separate NC Program per tool.
+### G-code Options
 
-- Create **one** NC Program and set the post processor (what you put in the NC Program’s operation list does not limit Batch Post).
-- In Batch Post, check the **setups** you want.
-- Batch Post posts **every operation in those setups** (`setup.allOperations`), then merges them according to your grouping options.
+| Option | Notes |
+|---|---|
+| Rotate A-Axis between setups | Writes A moves between setups from their WCS orientation. |
+| Retract Y on A-axis rotation / coordinate | Optional `G53` Y retract before rotating. |
+| Restore rapid moves | Rewrites Z-up → XY traverse → Z-down patterns from `G1` to `G0`, marked with `(Rapid movement start/end)`. Each operation gets a `(Rapid restore: N segment(s))` note. |
+| Minimum rapid move distance (mm) | Links shorter than this are ignored. Raise it (20–30) if facing stepovers get converted. |
+| Add line numbers | Optional N-word numbering. |
+| G-code blocks | Tool-change preamble (`M9`), end-of-program codes (`M5 M9 M30`), and header-end codes (`G20 G21`). Codes match whole words, so `M3` never matches `M30`. |
 
-That is how Fusion Personal gets multi-tool G-code: each operation is posted alone, then stitched into one or more output files.
+### Output Options
 
-### Tabs
-There are four tabs ordered as a workflow: [Input Selection](#input-selection-tab), [G-code Options](#g-code-options), [Output Options](#output-options) and [Misc](#misc). Settings on each tab are saved to the document as they change. The only settings that are not saved are `Overwrite existing files` and `Clear output folder`.
+| Option | Notes |
+|---|---|
+| Output folder / File name | Taken from the NC Program. The extension comes from the post-processor. |
+| Operations grouping | **Single file** (default) · Group on setup · Group on setup and tool · One file per operation. |
+| Combine operations using same tool | Posts consecutive operations that use the same tool together, so there's no repeated tool change between them. |
+| Flat file structure | For multi-file groupings, writes the files straight into the output folder instead of into subfolders (named after the file name, and per setup for the setup-and-tool and per-operation groupings). |
+| Prepend sequence number / Name must be numeric | File-naming helpers for controllers that need numbered programs. |
+| Overwrite existing files | When it's off, you're asked before a file is overwritten. |
+| Clear output folder | Empties the folder before writing. This requires Overwrite. **Post Combined never uses it.** |
 
-You can also save default settings locally for new documents.
+### Misc
 
-#### Input Selection Tab
+Language (English / Svenska) and setup search-and-replace renaming (optionally with regex).
 
-Select the **NC Program** that holds your post-processor settings. The dialog shows the optional **Machine** and required **Post Processor**.
+## Troubleshooting
 
-Select setups in the table (order matters for A-axis rotation). Origin, X-axis alignment, and A-axis rotation relative to the first selected setup are shown for reference. Incompatible WCS is warned at Process time rather than greying out the checkboxes (and is skipped when only one setup is selected).
+| Symptom | Fix |
+|---|---|
+| No buttons in Manufacture | Check that the folder is named `djr_batchpost` and that the add-in is running in *Scripts and Add-Ins*. Then restart Fusion. |
+| You upgraded from "Batch Post" and now see two sets of buttons | Stop and remove the old `Batch Post` add-in in *Scripts and Add-Ins*. Your per-document settings carry over. |
+| "No usable NC Program found" | Create an NC Program, pick a post-processor, and add at least one operation. |
+| A file is missing in a multi-setup post | Make sure every setup's toolpaths are valid (no red ✕) and not suppressed. |
+| Rapids weren't restored on a facing pass | Raise *Minimum rapid move distance*. |
+| Want detailed logs | Set `DEBUG = True` in `config.py` and watch the *Text Commands* window. |
 
-Use **Process** to run the add-in, or **Close** to exit without posting.
+Always verify the result in a viewer such as [NCViewer](https://ncviewer.com) and air-cut before running new output on the machine.
 
-#### G-code Options
+## Install from source
 
-- **Rotate A-Axis between setups** — inject A-axis moves between setups from WCS orientation (no machine definition required)
-- **Retract Y on A-axis rotation** / **Y-retraction coordinate** — optional Y retract in G53 before rotating
-- **Restore rapid moves** — convert qualifying retract/traverse/plunge patterns from `G1` to `G0` (see below)
-- **Minimum rapid move distance (mm)** — ignore short links; raise this (e.g. 20–30) on facing toolpaths if every stepover is being restored
-- **Add line numbers** — optional N-word numbering
-- **G-code blocks** — tool-change preamble, end-of-program markers (`M5`/`M9`/`M30` by default), and header-end markers (`G20`/`G21` by default)
+```bash
+git clone https://github.com/jayem1427/djr_batchpost.git djr_batchpost
+```
 
-##### Restore rapid moves
-
-Fusion Personal often posts non-cutting retracts as `G1` with a feed rate. When this option is on, Batch Post looks for Z-up → XY traverse → Z-down patterns and rewrites them to `G0`, with `(Rapid movement start)` / `(Rapid movement end)` markers.
-
-Notes:
-
-- Analysis runs when the merged file is written, after Fusion has finished each temp post (avoids empty/partial temp files).
-- Opening `M9` (coolant off before tool change on LinuxCNC posts) is **not** treated as the program end; only the trailing end-code run (usually `M30`) is.
-- Output includes `(Rapid restore: N segment(s))` under each operation when the option is enabled — useful for verifying that restore ran.
-- Validate paths in a viewer such as [NCViewer](https://ncviewer.com) before running on the machine.
-
-#### Output Options
-
-- **Output folder** and **File name** (extension comes from the post-processor)
-- **Operations grouping**: Single file / Group on Setup / Group on Setup and Tool / One file per Operation
-- **Combine operations using same tool**
-- Flat file structure, sequence numbers, numeric-only names, overwrite, and clear-folder options
-
-#### Misc
-
-Language selection and setup rename (search/replace, optional regex).
+Then add the `djr_batchpost` folder in Fusion as in the Quick start. After a `git pull`, stop and start the add-in (or restart Fusion) to load the new code.
 
 ## Development
 
 ```bash
-git checkout -b dev
-git commit -m "Describe your changes"
-git push -u origin dev
+pip install pytest
+python -m pytest
 ```
 
-Keep `Batch Post.manifest` `"version"` and `config.py` `PLUGIN_VERSION` identical.
+The tests stub the Fusion `adsk` API, so they run anywhere. They cover the parsers, the G/M code matching, tail and rapid detection, A-axis injection, NC Program preselection, the overwrite prompt, and packaging checks (icons present, manifest and `config.py` versions in sync).
 
-### Tests
-
-Unit tests cover pure helpers and parsers without Fusion installed:
+**Releasing:** bump `"version"` in `djr_batchpost.manifest` and `PLUGIN_VERSION` in `config.py`, add a section to `CHANGELOG.md`, then push a tag:
 
 ```bash
-pip install pytest
-python -m pytest tests/ -v
+git tag v1.0.0 && git push origin v1.0.0
 ```
 
-The suite stubs the Autodesk `adsk` API and documents historical bugs (substring M-code matching, bitwise `|` defaults, trailing end-code / rapid restore helpers, etc.) so they cannot regress silently.
+The *Release* workflow runs the tests, builds `djr_batchpost-v1.0.0.zip` with `tools/build_release.py`, and publishes a GitHub release with the changelog section as its notes. To build the zip locally, run `python tools/build_release.py` (it writes to `dist/`).
 
-## Project Structure (key files)
-- `Batch Post.py` – main add-in entry point
-- `Batch Post.manifest` – Fusion add-in metadata (version shown in Scripts and Add-Ins)
-- `config.py` – `PLUGIN_VERSION` (written into G-code headers)
-- `commands/` – Fusion command modules
-- `commands/postProcessor` – batch post-processing logic
-- `commands/postProcessor/runtime_options.py` – per-run flags from the dialog (e.g. restore rapids)
-- `commands/postProcessor/dialog` – UI
-- `commands/postProcessor/resources/i18n` – translations
-- `lib/` – shared helpers
+### Layout
 
-## Contributing
-- Fork the repository and open pull requests against `dev`.
-- Follow the project's code style and write clear commit messages.
+```
+djr_batchpost.py / .manifest / .svg   Fusion entry point, metadata, add-in icon
+config.py                             PLUGIN_VERSION, DEBUG
+commands/postProcessor/
+  dialog/                             the DJR Batch Post dialog (+ resources/ icons)
+  quick_post.py                       the Post Combined button (+ dialog/resources_quick/ icons)
+  post_runner.py                      shared run: safety prompts, post, overwrite prompt, report
+  setups/ operations/                 posting and merging
+  resources/i18n/                     translations
+resources/branding/                   logo and icon sources (SVG)
+tools/build_release.py                release zip builder
+```
+
+## Acknowledgments
+
+djr_batchpost is a fork of the [Makera Community Fusion Plugin](https://github.com/Carvera-Community/CarveraCommunity_FusionPlugin), which was itself inspired by Tim Paterson's [PostProcessAll](https://github.com/TimPaterson/Fusion360-Batch-Post). Thanks to both projects and their communities. This fork is machine-agnostic and carries no vendor branding.
 
 ## License
-GNU General Public License v2.0
 
-## Contact
-Use GitHub issues for any issues
+GNU General Public License v2.0, the same as the upstream project.

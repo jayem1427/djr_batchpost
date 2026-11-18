@@ -203,5 +203,19 @@
   "TOOLTIP TEXT: Save as default settings": "Save current dialog settings as the default for new documents.",
 
   "Process": "Process",
-  "Close": "Close"
+  "Close": "Close",
+
+  "post_combined": {
+      "__meta__": {
+            "description": "Post Combined button and completion messages."
+          },
+      "Overwrite it?": "Overwrite it?",
+      "{path} already exists.": "{path} already exists.",
+      "Wrote {count} file(s) to:<br>{folder}<p>{files}<p>Open the folder?": "Wrote {count} file(s) to:<br>{folder}<p>{files}<p>Open the folder?",
+      "Posting finished. Output folder:<br>{folder}<p>Open the folder?": "Posting finished. Output folder:<br>{folder}<p>Open the folder?",
+      "This document has no Manufacture (CAM) data to post.": "This document has no Manufacture (CAM) data to post.",
+      "No usable NC Program found.<p>Create an NC Program (with at least one operation) and pick your post processor, then try again.": "No usable NC Program found.<p>Create an NC Program (with at least one operation) and pick your post processor, then try again.",
+      "The NC Program '{name}' has no post processor.<p>Edit the NC Program, pick your .cps post processor, then try again.": "The NC Program '{name}' has no post processor.<p>Edit the NC Program, pick your .cps post processor, then try again.",
+      "No setups to post. Unsuppress a setup or fix its errors, then try again.": "No setups to post. Unsuppress a setup or fix its errors, then try again."
+    }
 }

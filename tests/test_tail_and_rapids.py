@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from commands.postProcessor.gcode_helpers import (
     force_rapid_start_line,
     is_tail_gap_line,
@@ -13,6 +15,10 @@ from commands.postProcessor.operations.operation.rapidsParser import RapidsParse
 REPO = Path(__file__).resolve().parents[1]
 SAMPLE_NGC = REPO / "1001.ngc"
 SETUP1_NGC = REPO / "Setup1.ngc"
+# The .ngc captures are local Fusion posts and are gitignored (*.ngc);
+# tests that need them are skipped on a clean checkout / in CI.
+needs_sample = pytest.mark.skipif(not SAMPLE_NGC.exists(), reason="1001.ngc sample not present (gitignored local capture)")
+needs_setup1 = pytest.mark.skipif(not SETUP1_NGC.exists(), reason="Setup1.ngc sample not present (gitignored local capture)")
 END_CODES = "M5\nM9\nM30"
 
 
@@ -59,6 +65,7 @@ def test_line_matches_end_codes_ignores_toolchange_m600():
     assert not line_matches_end_codes("N35 S15000 M3\n", END_CODES)
 
 
+@needs_sample
 def test_linuxcnc_sample_tail_is_m30_not_opening_m9():
     lines = SAMPLE_NGC.read_text(encoding="utf-8").splitlines(True)
     body_start = next(i for i, line in enumerate(lines) if "G53" in line and "G0" in line)
@@ -69,6 +76,7 @@ def test_linuxcnc_sample_tail_is_m30_not_opening_m9():
     assert m9 != m30
 
 
+@needs_sample
 def test_sample_retracts_are_inside_body_window():
     lines = SAMPLE_NGC.read_text(encoding="utf-8").splitlines(True)
     body_start = next(i for i, line in enumerate(lines) if "G53" in line and "G0" in line)
@@ -92,6 +100,7 @@ def test_strip_feed_words():
     assert strip_feed_words("X10 Y20 F1200.\n").strip() == "X10 Y20"
 
 
+@needs_setup1
 def test_setup1_has_valid_rapid_candidates():
     segs = RapidsParser.analyze(RapidsParser.parseFile(SETUP1_NGC), minDist=20)
     valid = [s for s in segs if s.get("isValid")]

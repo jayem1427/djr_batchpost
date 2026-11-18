@@ -48,7 +48,10 @@ def test_m3_does_not_start_tail_when_end_codes_include_m30():
     harness = _ParserHarness()
     assert harness.parse_body_line("M3\n", 10) is False
     assert harness._tailStartLine == -1
-    assert harness.parse_body_line("M30\n", 11) is True
+    # The parser no longer stops at the first end code (Fusion LinuxCNC
+    # posts an opening M9 per operation); it keeps scanning and tracks the
+    # start of the *trailing* end-code run instead, so it always returns False.
+    assert harness.parse_body_line("M30\n", 11) is False
     assert harness._tailStartLine == 11
 
 

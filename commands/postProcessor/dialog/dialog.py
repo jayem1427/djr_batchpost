@@ -1,6 +1,4 @@
 from __future__ import annotations
-from pathlib import Path
-import tempfile
 import adsk.core
 import os
 
@@ -17,7 +15,6 @@ from .. import config
 
 from .layout.layout import PostDialogLayout
 from .event_registry import EventRegistry
-from ..validation_helpers import should_warn_machine_lacks_a_axis
 
 class PostDialog(PostDialogLayout):
 
@@ -174,61 +171,23 @@ class PostDialog(PostDialogLayout):
     # is immediately called after the created event not command inputs were created for the dialog.
     @classmethod
     def commandExecute(cls, args: adsk.core.CommandEventArgs):
-        # General logging for debug.
+        from .. import post_runner, runtime_options
 
         app: adsk.core.Application = adsk.core.Application.get()
         ui = app.userInterface
         command = args.command
 
-        alignedWCS, badOrigins, badXAxes = Setups.getWCSAlignmentIssues()
-        if not alignedWCS and Setups.Count > 1:
-            Utils.log(f'PostDialog: WCS are not aligned for setups: {badOrigins}', adsk.core.LogLevels.ErrorLogLevel)
-            msg = '<i><u>Warning:</u></i><p>'
-            if command.commandInputs.itemById(cls._ROTATE_A_AXIS_ID).value:
-                msg += "Using 4th axis rotation while all Work Coordinate Systems isn't aligned properly may result in unexpected results, including damage to property and person.<p>"
-            else:
-                msg += "Some Work Coordinate Systems aren't aligned properly which may result in unexpected results, including damage to property and person.<p>"
-            msg += "Do NOT use the result from this plug-in unless you have personally verified that the result can be used.<p>" 
-            res = ui.messageBox(msg,
-            "WARNING! Do not proceed!", 
-            adsk.core.MessageBoxButtonTypes.OKCancelButtonType,
-            adsk.core.MessageBoxIconTypes.CriticalIconType)
-        
-            if res != adsk.core.DialogResults.DialogOK:
-                Utils.log('PostDialog: User cancelled operation due to unaligned WCS.', adsk.core.LogLevels.InfoLogLevel)
-                return
-
-
-        needAAxisRotation, setups = Setups.AAxisRotationRequired()
-        if should_warn_machine_lacks_a_axis(
-            has_machine=Programs.Current.hasMachine,
-            machine_has_a_axis=Programs.Current.machineHasAAxis,
-            a_axis_rotation_required=needAAxisRotation,
-        ):
-            Utils.log(f'PostDialog: Machine {Programs.Current.machineName} does not support A axis but setups {setups} require A axis rotation.', adsk.core.LogLevels.WarningLogLevel)
-            msg = '<i><u>Warning:</u></i><p>'
-            msg += f"The selected machine '{Programs.Current.machineName}' does not support A axis rotation, but the following setups require A axis rotation:<p>"
-            for setupName, angle in setups:
-                msg += f"{setupName} ({angle}°)<p>"
-            msg += "Using 4th axis rotation while the machine doesn't support it may result in unexpected results, including damage to property and person.<p>"
-            msg += "Do NOT use the result from this plug-in unless you have personally verified that the result can be used.<p>" 
-            res = ui.messageBox(msg,
-            "WARNING! Do not proceed!", 
-            adsk.core.MessageBoxButtonTypes.OKCancelButtonType,
-            adsk.core.MessageBoxIconTypes.CriticalIconType)
-        
-            if res != adsk.core.DialogResults.DialogOK:
-                Utils.log('PostDialog: User cancelled operation due to unsupported A axis rotation.', adsk.core.LogLevels.InfoLogLevel)
-                return
+        rotateAAxis = bool(command.commandInputs.itemById(cls._ROTATE_A_AXIS_ID).value)
+        if not post_runner.confirm_safety(ui, rotateAAxis):
+            return
 
         try:
-            from .. import runtime_options
             runtime_options.sync_from_command_inputs(command.commandInputs)
-
-            # Create a temporary folder to prepare all files in
-            with tempfile.TemporaryDirectory() as tmpdir:
-                Programs.Current.Process(Path(tmpdir))
-                Programs.Current.Generate()
+            outputs = post_runner.run_with_overwrite_prompt(ui)
+            if outputs is None:
+                Utils.log('PostDialog: User declined to overwrite existing output.', adsk.core.LogLevels.InfoLogLevel)
+                return
+            post_runner.report_success(ui, outputs)
         except FileExistsError as e:
             Utils.log(f'PostDialog: {str(e)}', adsk.core.LogLevels.ErrorLogLevel)
             ui.messageBox(str(e), "File already exists!", adsk.core.MessageBoxButtonTypes.OKButtonType, adsk.core.MessageBoxIconTypes.CriticalIconType)

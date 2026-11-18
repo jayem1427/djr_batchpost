@@ -137,7 +137,7 @@ def filter_merged_source_line(line: str) -> str | None:
     Return ``None`` to drop a line when stitching posted operation files.
 
     Percent delimiters are stripped from merged output. LinuxCNC only allows
-    ``%`` as the first and last non-blank lines of a file; Batch Post injects
+    ``%`` as the first and last non-blank lines of a file; djr_batchpost injects
     its own header comments before the post-processor header, which would leave
     a stray ``%`` in the body. ``M30`` / ``M2`` make percent wrapping optional.
     """

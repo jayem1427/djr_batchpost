@@ -34,13 +34,14 @@ class Programs(metaclass=_ProgramsMeta):
         cls._cam = cam
         cls._items = [Program(program) for program in cam.ncPrograms]
 
-        cls._current = None
-        if Settings(Settings.NC_PROGRAM) is not None:
-            # Try to set the current program to the one specified in settings
-            for program in cls._items:
-                if program.name == Settings(Settings.NC_PROGRAM):
-                    cls.Current = program
-                    break
+        # Preselect the saved program, or the first usable one with a post
+        # processor, so the dialog opens ready to Process instead of
+        # making the user pick from a one-item dropdown every time.
+        from .quick_post_helpers import pick_default_program
+        cls._current = pick_default_program(cls._items, Settings(Settings.NC_PROGRAM))
+        if cls._current is not None and Settings(Settings.NC_PROGRAM) != cls._current.name:
+            # The dropdown marks the item matching this setting as selected.
+            Settings(Settings.NC_PROGRAM, cls._current.name)
 
         Setups.Load(cam.setups)
 

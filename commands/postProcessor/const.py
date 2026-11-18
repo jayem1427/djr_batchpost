@@ -1,5 +1,8 @@
 class Const():
-    CMD_NAME = "Batch Post"
+    CMD_NAME = "DJR Batch Post"
+    # Kept from the pre-rename "Batch Post" builds: ATTR_GROUP is derived from
+    # it and is the key settings are stored under in each .f3d document.
+    # Changing it would silently drop every saved per-document setting.
     CMD_DEF_ID = "BatchPost_Post_Processor"
     CAM_WORKSPACE_ID = "CAMEnvironment"
     CAM_ACTIONS_PANEL_ID = "CAMActionPanel"

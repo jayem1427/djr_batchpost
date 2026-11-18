@@ -58,17 +58,21 @@ def install_adsk_stub() -> None:
         "MessageBoxButtonTypes",
         OKButtonType=0,
         OKCancelButtonType=1,
+        YesNoButtonType=2,
     )
     core.MessageBoxIconTypes = _make_enum(
         "MessageBoxIconTypes",
         InformationIconType=0,
         WarningIconType=1,
         CriticalIconType=2,
+        QuestionIconType=3,
     )
     core.DialogResults = _make_enum(
         "DialogResults",
         DialogOK=0,
         DialogCancel=1,
+        DialogYes=2,
+        DialogNo=3,
     )
     core.DropDownStyles = _make_enum(
         "DropDownStyles",
@@ -118,6 +122,16 @@ def install_adsk_stub() -> None:
     cam.Setups = object
     cam.Operation = object
     cam.Tool = object
+
+    # Any other Fusion type referenced only in annotations/isinstance checks
+    # resolves to a plain placeholder so whole modules can be imported.
+    def _placeholder(name):
+        if name.startswith("__"):
+            raise AttributeError(name)
+        return object
+
+    core.__getattr__ = _placeholder  # type: ignore[attr-defined]
+    cam.__getattr__ = _placeholder  # type: ignore[attr-defined]
 
     adsk.core = core
     adsk.cam = cam

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="128" viewBox="0 0 560 128">
+  <g transform="translate(8,0) scale(2)">
+    <rect x="22" y="4" width="34" height="42" rx="4" fill="#C9CED6" stroke="#2B2F36" stroke-width="3"/>
+    <rect x="15" y="10" width="34" height="42" rx="4" fill="#E3E6EA" stroke="#2B2F36" stroke-width="3"/>
+    <path d="M12 16 H34 L44 26 V56 a4 4 0 0 1 -4 4 H12 a4 4 0 0 1 -4 -4 V20 a4 4 0 0 1 4 -4 Z" fill="#FBFAF7" stroke="#2B2F36" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M34 16 V22 a4 4 0 0 0 4 4 H44" fill="none" stroke="#2B2F36" stroke-width="3" stroke-linejoin="round"/>
+    <rect x="14" y="31" width="22" height="5" rx="2.5" fill="#F29E2E"/>
+    <rect x="14" y="40" width="16" height="5" rx="2.5" fill="#21A99A"/>
+    <rect x="14" y="49" width="24" height="5" rx="2.5" fill="#3F72D6"/>
+  </g>
+  <text x="148" y="70" font-family="'JetBrains Mono','SFMono-Regular',Menlo,Consolas,'Liberation Mono',monospace" font-size="46" font-weight="700" fill="#8A929E"><tspan fill="#F29E2E">djr</tspan>_<tspan fill="#3F72D6">batchpost</tspan></text>
+  <text x="150" y="104" font-family="-apple-system,'Segoe UI',Helvetica,Arial,sans-serif" font-size="18" fill="#8A929E">Every setup, every tool, one G-code file.</text>
+</svg>

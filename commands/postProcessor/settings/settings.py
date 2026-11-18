@@ -46,7 +46,7 @@ class Settings(Constants, metaclass=_SettingsMeta):
         Constants.LINE_SEQUENCE:                False,
         Constants.LINE_SEQUENCE_DIGITS:         2,
         Constants.LINE_SEQUENCE_INTERVAL:       5,
-        Constants.OPERATIONS_GROUPING:          Constants.OperationsGroupings.SETUP,
+        Constants.OPERATIONS_GROUPING:          Constants.OperationsGroupings.SINGLE_FILE,
         Constants.COMBINE_TOOL:                 False,
         Constants.VERSION:                      config.SETTINGS_VERSION,
         Constants.PLUGIN_VERSION:               GLOBAL_PLUGIN_VERSION,
@@ -71,16 +71,18 @@ class Settings(Constants, metaclass=_SettingsMeta):
 
     @classmethod
     def Load(cls, attr: Attributes = None):
+        documentItems = None
         if attr and attr.count > 0:
             try:
-                cls._items = json.loads(attr.itemByName(Const.ATTR_GROUP, Const.ATTR_NAME).value)
-                if cls._items.get(Constants.VERSION) is not None and cls._items[Constants.VERSION] == config.SETTINGS_VERSION:
+                documentItems = json.loads(attr.itemByName(Const.ATTR_GROUP, Const.ATTR_NAME).value)
+                if documentItems.get(Constants.VERSION) is not None and documentItems[Constants.VERSION] == config.SETTINGS_VERSION:
                     # Still merge newly-added keys so older documents that
                     # already have this version number pick up defaults.
+                    cls._items = documentItems
                     cls.Update(Settings._defaultSettings, cls._items)
                     return  # settings are valid for this version
             except Exception:
-                pass
+                documentItems = None
             
         # Document does not have valid settings, get defaults
         if not cls._default:
@@ -96,10 +98,15 @@ class Settings(Constants, metaclass=_SettingsMeta):
                 cls._default = dict(Settings._defaultSettings)
                 cls._fMustSave = True
         
-        if not cls._items:
-            cls._items = dict(cls._default)
-        else:
+        if documentItems:
+            # Settings from an older settings version: keep the document's
+            # values and add any keys introduced since.
+            cls._items = documentItems
             cls.Update(cls._default, cls._items)
+        else:
+            # This document has no settings yet: start from the defaults,
+            # not from whichever document was used last in this session.
+            cls._items = dict(cls._default)
 
     @classmethod
     def SaveDefault(cls):
@@ -141,5 +148,9 @@ class Settings(Constants, metaclass=_SettingsMeta):
     
     @classmethod
     def Set(cls, key, value):
+        # Only the document copy changes here. The defaults file for new
+        # documents is written by "Save as default settings" (SaveDefault),
+        # or once on first run when no defaults file exists yet. Previously
+        # every change also overwrote the defaults when the dialog closed,
+        # which made the button meaningless and let per-run overrides leak.
         cls._items[key] = value
-        cls._fMustSave = True

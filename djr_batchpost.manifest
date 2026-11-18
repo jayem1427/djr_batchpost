@@ -1,0 +1,13 @@
+{
+	"autodeskProduct":	"Fusion",
+	"type":	"addin",
+	"author":	"jayem1427 and Batch Post contributors",
+	"description":	{
+		"":	"DJR Batch Post: post every operation in your setups into one combined G-code file (or one per setup/tool/operation). One-click Post Combined button. Works with any post-processor; built for multi-tool programs on Fusion Personal."
+	},
+	"version":	"1.0.0",
+	"runOnStartup":	true,
+	"supportedOS":	"windows|mac",
+	"editEnabled":	true,
+	"iconFilename":	"djr_batchpost.svg"
+}

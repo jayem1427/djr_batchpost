@@ -66,7 +66,7 @@ class Operation(OperationParser, OperationHeader, OperationBody, OperationTail):
 
     @property
     def hasTool(self) -> bool:
-        return self._operationWithTool is not -1 and self._operationsDict[self._operationWithTool].hasToolpath
+        return self._operationWithTool != -1 and self._operationsDict[self._operationWithTool].hasToolpath
 
     @property
     def name(self) -> str:

@@ -1,4 +1,3 @@
-from ast import Tuple
 import adsk.core
 from adsk.core import DropDownStyles
 from .....lib.fusionAddInUtils.general_utils import Utils
@@ -279,7 +278,7 @@ class InputTab(PostDialogConstants):
                         sameOrigin: bool,
                         parallelXAxis: bool,
                         rotation: float
-                    ) -> Tuple[bool, bool, str, str, str]:
+                    ) -> dict:
         """Determines the enabled state, selected state, and displayed 
         origin, xNormal, and rotation values for a given setup row in 
         the table based on the setup's properties and the current 

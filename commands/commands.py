@@ -1,12 +1,14 @@
 from __future__ import annotations
 from .postProcessor.dialog.dialog import PostDialog
+from .postProcessor.quick_post import QuickPostCommand
 
 class Commands():
 
-    # TODO add your imported modules to this list.
     # Fusion will automatically call the start() and stop() functions.
+    # Order matters: Post Combined is placed after the dialog's button.
     _commands = [
-        PostDialog
+        PostDialog,
+        QuickPostCommand,
     ]
 
 
