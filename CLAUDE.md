@@ -107,10 +107,10 @@ Converting a move that cuts into a `G0` can crash the machine, so these rules ar
 - Posts: `adsk.cam.CAMManager.get().libraryManager.postLibrary` provides `urlByLocation(LibraryLocations.X)`, `childPostConfigurations(url)` and `childFolderURLs(url)`. `PostConfiguration` has **no URL**, so a post is matched by description + vendor + extension.
 - NC Program creation: `cam.ncPrograms.createInput()` → set `displayName`, `parameters` (`nc_program_filename`, `nc_program_output_folder`, `nc_program_openInEditor`) and `operations = [setups]` → `cam.ncPrograms.add(input)`, then `program.postConfiguration = post`.
 
-## Status as of v1.1.0 (2026-11-19)
+## Status as of v1.2.0 (2026-11-19)
 
 - **Verified in the real Fusion:** both toolbar buttons appear, the setup right-click entry appears, and the add-in starts and stops cleanly.
 - **Verified only in tests and the simulation:** automatic NC Program creation and the post library search, an actual right-click post, and the issue #5 rapid rules. The first real post should be checked in a G-code viewer and air-cut.
-- **Released:** `v1.1.0` is tagged at `31eae75` with `djr_batchpost-v1.1.0.zip` attached, built by the Release workflow and matching `main` file for file.
+- **Released:** `v1.1.0` (tag at `31eae75`; its zip already contains the 1.2.0 fixes). `v1.2.0` is the same code re-versioned with the fixes in their own changelog section; it's published once its tag is pushed.
 - **Branches:** only `main`. The old `djr_batchpost` and `cursor/4th-axis-without-machine-d9ab` branches were merged into it and then deleted.
 - The Swedish strings (`sv.json`) for the newer messages were written without a native-speaker review.

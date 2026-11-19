@@ -76,7 +76,7 @@ merge: one header ─► tool comments ─► bodies (+ tool changes, A-axis mov
 <output folder>/<file name>.<post extension>
 ```
 
-The header of every file shows the version that wrote it: `(Generated with DJR Batch Post version 1.1.0)`.
+The header of every file shows the version that wrote it: `(Generated with DJR Batch Post version 1.2.0)`.
 
 ## Options reference
 
@@ -149,10 +149,10 @@ The tests stub the Fusion `adsk` API, so they run anywhere. They cover the parse
 **Releasing:** bump `"version"` in `djr_batchpost.manifest` and `PLUGIN_VERSION` in `config.py`, add a section to `CHANGELOG.md`, then push a tag:
 
 ```bash
-git tag v1.1.0 && git push origin v1.1.0
+git tag v1.2.0 && git push origin v1.2.0
 ```
 
-The *Release* workflow runs the tests, builds `djr_batchpost-v1.1.0.zip` with `tools/build_release.py`, and publishes a GitHub release with the changelog section as its notes. To build the zip locally, run `python tools/build_release.py` (it writes to `dist/`).
+The *Release* workflow runs the tests, builds `djr_batchpost-v1.2.0.zip` with `tools/build_release.py`, and publishes a GitHub release with the changelog section as its notes. To build the zip locally, run `python tools/build_release.py` (it writes to `dist/`).
 
 ### Layout
 

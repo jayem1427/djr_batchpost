@@ -1,12 +1,8 @@
 # Changelog
 
-## v1.1.0 — 2026-11-18
+## v1.2.0 — 2026-11-19
 
-Right-click a setup and get G-code, even in a document with no NC Program.
-
-### New
-- **Right-click a setup → Post Combined (DJR).** Posts exactly the right-clicked setup(s) into one file. A single setup is written to a file named after it.
-- **Automatic NC Program.** When a document has no usable NC Program, Post Combined creates one covering every setup. It uses the post-processor and output folder remembered from your last successful post. If you've never posted, it uses the only post in your own library, when there is exactly one.
+Fixes: rapids restored at every operation's entry and exit, MillenniumOS posts, and NC Programs keeping their operations.
 
 ### Restore rapid moves: entries and exits ([#5](https://github.com/jayem1427/djr_batchpost/issues/5))
 - **Operation entries are now rapids.** After a G0, Fusion Personal descends at a stand-in "rapid" feed before the real plunge. Those lines are now G0, up to the line where the feed changes (the real plunge, which stays G1). If the feed never changes, nothing is converted, so a G1 plunge straight into the part (for example drilling) is never turned into a rapid.
@@ -16,8 +12,20 @@ Right-click a setup and get G-code, even in a document with no NC Program.
 - **Feed is restored after a restored rapid.** The end marker now puts back the last feed that was removed (`G1 F3600. (Rapid movement end)`), so a cutting line without its own F no longer runs at an older feed.
 
 ### Fixed
-- Posts that don't end with `M30` (e.g. MillenniumOS, which ends with `M5.9`/`M0`) were reported as "output file was not created". A stable output file now counts as complete, and the add-in finds the file Fusion actually wrote. (From the unmerged `cursor/4th-axis-without-machine-d9ab` branch.)
+- Posts that don't end with `M30` (e.g. MillenniumOS, which ends with `M5.9`/`M0`) were reported as "output file was not created". A stable output file now counts as complete, and the add-in finds the file Fusion actually wrote.
 - Posting overwrote the NC Program's operation list with the last operation posted, and never restored it. Your NC Program now keeps its operations.
+
+### For developers
+- `tools/fusion_sim/` runs the add-in end to end against a fake Fusion API (`python tools/fusion_sim/run_all.py`). It's part of the Tests workflow.
+- `CLAUDE.md` documents the layout, file locations, release and install steps, and the invariants.
+
+## v1.1.0 — 2026-11-18
+
+Right-click a setup and get G-code, even in a document with no NC Program.
+
+### New
+- **Right-click a setup → Post Combined (DJR).** Posts exactly the right-clicked setup(s) into one file. A single setup is written to a file named after it.
+- **Automatic NC Program.** When a document has no usable NC Program, Post Combined creates one covering every setup. It uses the post-processor and output folder remembered from your last successful post. If you've never posted, it uses the only post in your own library, when there is exactly one.
 
 ## v1.0.0 — 2026-11-18
 
