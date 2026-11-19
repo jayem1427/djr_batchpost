@@ -67,6 +67,8 @@ python tools/build_release.py --check  # manifest/config versions match, CHANGEL
 3. Push to `main`, then push a tag: `git tag vX.Y.Z && git push origin vX.Y.Z`.
 4. `.github/workflows/release.yml` runs the tests, checks that the tag matches the version, builds the zip, and creates the release (or updates an existing release with that tag).
 
+Release notes are the version's CHANGELOG section followed by the install steps in `tools/release_install.md` (`{version}` is filled in). `tests/test_release_notes.py` checks that they're there. To refresh an existing release's zip and notes without re-tagging, open **Actions → Release → Run workflow** and enter the tag. The install text always comes from `main`.
+
 A tag that doesn't match the code version makes the workflow fail without uploading anything. That's deliberate. Because this repo is a fork, Actions may need enabling in the Actions tab.
 
 **Cloud Claude sessions (claude.ai) cannot push tags, create or edit releases, delete branches, or change repo settings.** The session proxy blocks it. A local Claude Code session using the owner's `git`/`gh` can do all of these.
@@ -111,6 +113,6 @@ Converting a move that cuts into a `G0` can crash the machine, so these rules ar
 
 - **Verified in the real Fusion:** both toolbar buttons appear, the setup right-click entry appears, and the add-in starts and stops cleanly.
 - **Verified only in tests and the simulation:** automatic NC Program creation and the post library search, an actual right-click post, and the issue #5 rapid rules. The first real post should be checked in a G-code viewer and air-cut.
-- **Released:** `v1.1.0` (tag at `31eae75`; its zip already contains the 1.2.0 fixes). `v1.2.0` is the same code re-versioned with the fixes in their own changelog section; it's published once its tag is pushed.
+- **Released:** `v1.2.0` (tag at `f89c10f`), with its zip. `v1.1.0` (tag at `31eae75`) has the same code apart from the version number. The 1.2.0 changelog section lists the fixes.
 - **Branches:** only `main`. The old `djr_batchpost` and `cursor/4th-axis-without-machine-d9ab` branches were merged into it and then deleted.
 - The Swedish strings (`sv.json`) for the newer messages were written without a native-speaker review.

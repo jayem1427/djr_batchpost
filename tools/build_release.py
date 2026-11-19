@@ -44,11 +44,14 @@ def read_versions() -> tuple[str, str]:
 
 
 def release_notes(version: str) -> str:
+    """The version's CHANGELOG section, followed by the standard install steps
+    (tools/release_install.md), so every release says how to install it."""
     text = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
     match = re.search(rf"^## v{re.escape(version)}\b.*?$(.*?)(?=^## |\Z)", text, re.M | re.S)
     if not match:
         sys.exit(f"CHANGELOG.md has no '## v{version}' section")
-    return match.group(1).strip() + "\n"
+    install = (ROOT / "tools" / "release_install.md").read_text(encoding="utf-8")
+    return match.group(1).strip() + "\n\n" + install.replace("{version}", version).strip() + "\n"
 
 
 def iter_files():

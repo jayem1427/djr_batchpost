@@ -3,6 +3,13 @@ name: Release
 on:
   push:
     tags: ["v*"]
+  # "Run workflow" button: rebuild an existing tag's zip and notes
+  # (e.g. after changing the install text) without re-tagging.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to (re)publish, e.g. v1.2.0"
+        required: true
 
 permissions:
   contents: write
@@ -10,26 +17,38 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+      # The install text lives on main; use the latest version of it even
+      # when republishing an older tag.
+      - name: Use the latest install instructions
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          git fetch --depth=1 origin main
+          git show origin/main:tools/release_install.md > tools/release_install.md
+          git show origin/main:tools/build_release.py > tools/build_release.py
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install pytest
       - run: python -m pytest
       - name: Build add-in zip
-        run: python tools/build_release.py --tag "${GITHUB_REF_NAME}"
+        run: python tools/build_release.py --tag "${TAG}"
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # The release may already exist (e.g. created by hand or via the API);
-          # then just refresh its zip and notes.
-          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
-            gh release upload "${GITHUB_REF_NAME}" dist/*.zip --clobber
-            gh release edit "${GITHUB_REF_NAME}" --notes-file dist/RELEASE_NOTES.md
+          # The release may already exist (created by hand, or republished);
+          # then refresh its zip and notes.
+          if gh release view "${TAG}" >/dev/null 2>&1; then
+            gh release upload "${TAG}" dist/*.zip --clobber
+            gh release edit "${TAG}" --notes-file dist/RELEASE_NOTES.md
           else
-            gh release create "${GITHUB_REF_NAME}" dist/*.zip \
-              --title "djr_batchpost ${GITHUB_REF_NAME}" \
+            gh release create "${TAG}" dist/*.zip \
+              --title "djr_batchpost ${TAG}" \
               --notes-file dist/RELEASE_NOTES.md
           fi
