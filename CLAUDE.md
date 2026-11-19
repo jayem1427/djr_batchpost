@@ -111,6 +111,6 @@ Converting a move that cuts into a `G0` can crash the machine, so these rules ar
 
 - **Verified in the real Fusion:** both toolbar buttons appear, the setup right-click entry appears, and the add-in starts and stops cleanly.
 - **Verified only in tests and the simulation:** automatic NC Program creation and the post library search, an actual right-click post, and the issue #5 rapid rules. The first real post should be checked in a G-code viewer and air-cut.
-- **Open:** the GitHub release `v1.1.0` has no zip attached, and its tag points at the old commit `ba25fab`. Fix it with `git fetch origin && git tag -f v1.1.0 origin/main && git push -f origin v1.1.0`; the workflow then attaches the zip.
+- **Released:** `v1.1.0` is tagged at `31eae75` with `djr_batchpost-v1.1.0.zip` attached, built by the Release workflow and matching `main` file for file.
 - **Open:** the branches `djr_batchpost` and `cursor/4th-axis-without-machine-d9ab` are fully merged into `main` and can be deleted.
 - The Swedish strings (`sv.json`) for the newer messages were written without a native-speaker review.
