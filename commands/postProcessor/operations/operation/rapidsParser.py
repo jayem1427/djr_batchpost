@@ -42,6 +42,8 @@ class RapidsParser:
     K_Y = "y"
     K_Z = "z"
     K_EFFECTIVE_MOTION = "effectiveMotion"
+    K_LOCAL_FEED = "localFeed"          # F value written on this line (None if absent)
+    K_MACHINE_MOVE = "machineMove"      # line has G53 / G28 / G30
 
     # Segment output keys
     O_SEGMENTS = "segments"
@@ -177,6 +179,13 @@ class RapidsParser:
                             state.feed = value
 
                 effectiveMotion = (localMotion or state.motion)
+                localFeed = None
+                machineMove = False
+                for letter, value in words:
+                    if letter == cls.WORD.F:
+                        localFeed = value
+                    elif letter == cls.WORD.G and value in (53.0, 28.0, 30.0):
+                        machineMove = True
 
                 yield {
                     cls.K_IDX: i,
@@ -193,6 +202,8 @@ class RapidsParser:
                     cls.K_Y: state.y,
                     cls.K_Z: state.z,
                     cls.K_EFFECTIVE_MOTION: effectiveMotion,
+                    cls.K_LOCAL_FEED: localFeed,
+                    cls.K_MACHINE_MOVE: machineMove,
                 }
 
     class _BufferWindow:
@@ -417,6 +428,115 @@ class RapidsParser:
 
         return segments
 
+
+    # Entry / exit segments (issue #5) -----------------------------------
+    O_KIND = "kind"
+    KIND_LINK = "link"
+    KIND_ENTRY = "entry"
+    KIND_EXIT = "exit"
+
+    @classmethod
+    def _hasAxis(cls, row) -> bool:
+        return bool(row[cls.K_SAW_X] or row[cls.K_SAW_Y] or row[cls.K_SAW_Z])
+
+    @classmethod
+    def _segment(cls, kind: str, rows: list) -> dict:
+        first, last = rows[0], rows[-1]
+        return {
+            cls.O_KIND: kind,
+            cls.O_START_LINE: first[cls.K_LINENO],
+            cls.O_START: first[cls.K_ORIGINAL],
+            cls.O_END_LINE: last[cls.K_LINENO],
+            cls.O_END: last[cls.K_ORIGINAL],
+            cls.O_MIDDLE_LINES: [r[cls.K_LINENO] for r in rows[1:-1]],
+            cls.O_MIDDLE: [r[cls.K_ORIGINAL] for r in rows[1:-1]],
+            cls.KEY_IS_VALID: True,
+            cls.KEY_REASONS: [],
+        }
+
+    @classmethod
+    def parseEntriesAndExits(cls, path: Path) -> list:
+        """
+        Find the rapids Fusion Personal posts as feed moves at the start and
+        end of an operation, which the link rule (Z up -> XY -> Z down)
+        cannot see.
+
+        Entry: right after a G0 move, a run of Z-only G1 descents. The first
+        one carries the stand-in "rapid" feed. The run is a rapid up to the
+        last line before a line that sets a *different* F (the real plunge).
+        If no different F follows, nothing is converted: a single feed
+        descent after a rapid may be a real cut (e.g. drilling).
+
+        Exit: a Z-only G1 rise that is the last motion before a G0 move, a
+        G53/G28/G30 machine move, or the end of the file.
+
+        Single pass, constant memory. Distances are not checked: entries and
+        exits are typically shorter than the link minimum distance.
+        """
+        segments = []
+        lastMotion = None   # effective motion of the last line with axis words
+        entryRun = None     # rows of a candidate entry
+        entryFeed = None
+        exitRun = []        # consecutive Z-only rises: candidate exit
+
+        for row in cls._iterPerLine(path):
+            if not row[cls.K_WORDS]:
+                continue
+            hasAxis = cls._hasAxis(row)
+            motion = row[cls.K_EFFECTIVE_MOTION]
+
+            # --- exit: resolve a pending candidate at the next non-rise motion
+            if exitRun and (hasAxis or row[cls.K_MACHINE_MOVE]) and not cls._isZOnlyUp(row, True):
+                if row[cls.K_MACHINE_MOVE] or motion == cls.MOTION.G0:
+                    segments.append(cls._segment(cls.KIND_EXIT, exitRun))
+                exitRun = []
+
+            # --- entry: extend, commit or abort a pending run
+            if entryRun is not None:
+                if cls._isZOnlyDown(row, True):
+                    feed = row[cls.K_LOCAL_FEED]
+                    if feed is not None and feed != entryFeed:
+                        # The real plunge: everything before it was rapid.
+                        segments.append(cls._segment(cls.KIND_ENTRY, entryRun))
+                        entryRun = None
+                    else:
+                        entryRun.append(row)
+                elif hasAxis or row[cls.K_MACHINE_MOVE] or row[cls.K_LOCAL_FEED] is not None:
+                    entryRun = None  # no feed change seen: leave it alone
+                # lines without motion (M-codes etc.) inside a run: abort to be safe
+                elif any(letter != cls.WORD.G for letter, _ in row[cls.K_WORDS]):
+                    entryRun = None
+
+            # --- start new candidates
+            if (entryRun is None and lastMotion == cls.MOTION.G0
+                    and cls._isZOnlyDown(row, True) and row[cls.K_LOCAL_FEED] is not None):
+                entryRun = [row]
+                entryFeed = row[cls.K_LOCAL_FEED]
+
+            if cls._isZOnlyUp(row, True):
+                exitRun.append(row)
+
+            if hasAxis:
+                lastMotion = motion
+
+        if exitRun:
+            segments.append(cls._segment(cls.KIND_EXIT, exitRun))
+        return segments
+
+    @classmethod
+    def mergeSegments(cls, links: list, extras: list) -> dict:
+        """start line -> end line for all valid segments; links win overlaps."""
+        ranges = []
+        out = {}
+        for seg in list(links) + list(extras):
+            if not seg.get(cls.KEY_IS_VALID):
+                continue
+            start, end = seg[cls.O_START_LINE], seg[cls.O_END_LINE]
+            if any(start <= e and s <= end for s, e in ranges):
+                continue
+            ranges.append((start, end))
+            out[start] = end
+        return out
 
     KEY_IS_VALID = "isValid"
     KEY_REASONS = "reasons"

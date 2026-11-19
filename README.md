@@ -95,8 +95,8 @@ The dialog has four tabs. Each change is saved to the document as you make it. *
 |---|---|
 | Rotate A-Axis between setups | Writes A moves between setups from their WCS orientation. |
 | Retract Y on A-axis rotation / coordinate | Optional `G53` Y retract before rotating. |
-| Restore rapid moves | Rewrites Z-up → XY traverse → Z-down patterns from `G1` to `G0`, marked with `(Rapid movement start/end)`. Each operation gets a `(Rapid restore: N segment(s))` note. |
-| Minimum rapid move distance (mm) | Links shorter than this are ignored. Raise it (20–30) if facing stepovers get converted. |
+| Restore rapid moves | Fusion Personal posts rapids as `G1`. This turns them back into `G0`: links between cuts (Z-up → XY traverse → Z-down), each operation's **entry** (the descent after a G0, up to the real plunge feed), and its **exit** (the final retract before G0/`G53`). Marked with `(Rapid movement start/end)`; the end marker restores the active feed. Each operation gets a `(Rapid restore: N segment(s))` note. |
+| Minimum rapid move distance (mm) | Links shorter than this are ignored; entries and exits are always restored. Raise it (20–30) if facing stepovers get converted. |
 | Add line numbers | Optional N-word numbering. |
 | G-code blocks | Tool-change preamble (`M9`), end-of-program codes (`M5 M9 M30`), and header-end codes (`G20 G21`). Codes match whole words, so `M3` never matches `M30`. |
 

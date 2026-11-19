@@ -336,6 +336,26 @@ def wait_for_post_output(
 
 _FEED_WORD_RE = re.compile(r"\s*F[+-]?(?:\d+(?:\.\d*)?|\.\d+)", re.IGNORECASE)
 _LEADING_MOTION_G_RE = re.compile(r"^(\s*(?:N\d+\s*)?)G0*[01](?:\.\d*)?\b", re.IGNORECASE)
+# G0 / G1 / G00 / G01 anywhere on the line (not G10, G17, G43, ...).
+_ANY_MOTION_G_RE = re.compile(r"(?<![A-Za-z0-9.])G0*[01](?![0-9.])", re.IGNORECASE)
+_FEED_VALUE_RE = re.compile(r"F([+-]?(?:\d+(?:\.\d*)?|\.\d+))", re.IGNORECASE)
+
+
+def last_feed_word(line: str) -> str | None:
+    """The F value written on ``line`` (comments ignored), e.g. ``'3600.'``."""
+    found = _FEED_VALUE_RE.findall(strip_inline_comments(line))
+    return found[-1] if found else None
+
+
+def rapid_end_line(feed: str | None) -> str:
+    """
+    Marker that switches back to feed motion after a restored rapid.
+
+    ``feed`` is the last F removed from the rapid's lines. Writing it back
+    leaves the active feed exactly as the original program had it, so a
+    following cutting line without its own F doesn't run at an older feed.
+    """
+    return f"G1 F{feed} (Rapid movement end)\n" if feed else "G1 (Rapid movement end)\n"
 
 
 def strip_feed_words(line: str) -> str:
@@ -351,8 +371,9 @@ def force_rapid_start_line(line: str) -> str:
     older G-code regex matched as an empty string.
     """
     working = strip_feed_words(strip_inline_comments(line.rstrip("\r\n")))
-    if _LEADING_MOTION_G_RE.match(working):
-        working = _LEADING_MOTION_G_RE.sub(r"\1G0", working, count=1)
+    if _ANY_MOTION_G_RE.search(working):
+        # Replace the motion word wherever it is: "G94 G1 Z40." -> "G94 G0 Z40."
+        working = _ANY_MOTION_G_RE.sub("G0", working)
     else:
         # Modal axis words (" Z5." / "X10 Y20") need an explicit G0.
         working = working.lstrip()

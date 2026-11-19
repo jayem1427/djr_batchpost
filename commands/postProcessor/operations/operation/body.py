@@ -7,6 +7,8 @@ from ...gcode_helpers import (
     filter_merged_source_line,
     force_rapid_start_line,
     format_a_axis_rotation_block,
+    last_feed_word,
+    rapid_end_line,
     format_comment,
     should_inject_synthetic_a_axis,
     strip_feed_words,
@@ -31,11 +33,10 @@ class OperationBody(Line):
             self._rapidsAnalysis = {}
             return
         minDist = coalesce_min_distance(runtime_options.rapid_moves_minimum_distance, 20)
-        self._rapidsAnalysis = {
-            seg["startLine"]: seg["endLine"]
-            for seg in RapidsParser.analyze(RapidsParser.parseFile(self._tempFilePath), minDist=minDist)
-            if seg.get("isValid") and "startLine" in seg and "endLine" in seg
-        }
+        links = RapidsParser.analyze(RapidsParser.parseFile(self._tempFilePath), minDist=minDist)
+        # Entries/exits skip the distance rule: they're usually 10-17 mm.
+        extras = RapidsParser.parseEntriesAndExits(self._tempFilePath)
+        self._rapidsAnalysis = RapidsParser.mergeSegments(links, extras)
 
     def WriteBody(self, fileHandler: TextIO, rotationAngle: Optional[float] = None, preserveRotation: Optional[bool] = False):
         self._refreshRapidsAnalysis()
@@ -47,6 +48,7 @@ class OperationBody(Line):
             line = operationFile.readline()
             row = 0
             rapidsEnds = 0
+            rapidFeed = None  # last F removed inside the current restored rapid
             readNextLine = False
             wroteRapidsStatus = False
             while len(line) != 0:
@@ -76,21 +78,31 @@ class OperationBody(Line):
                             )
                             inject_a_axis = False
                     if row + 1 in self._rapidsAnalysis: # Add rapids comments if this line is the start of a rapid move
-                        rapidsEnds = self._rapidsAnalysis[row + 1]
+                        rapidFeed = last_feed_word(line)
                         self._lineNumber = self._write(fileHandler, force_rapid_start_line(line), self._lineNumber)
+                        if self._rapidsAnalysis[row + 1] == row + 1:
+                            # One-line rapid (entry/exit): switch back to feed right away.
+                            self._lineNumber = self._write(fileHandler, rapid_end_line(rapidFeed), self._lineNumber)
+                            rapidsEnds, rapidFeed = 0, None
+                        else:
+                            rapidsEnds = self._rapidsAnalysis[row + 1]
                         readNextLine = True
                         continue
                     if rapidsEnds and row + 1 < rapidsEnds:
                         # Intermediate rapid traverse/retract words — keep G0 modal, drop F.
+                        rapidFeed = last_feed_word(line) or rapidFeed
                         cleaned = strip_feed_words(line.rstrip("\r\n")).rstrip() + "\n"
                         self._lineNumber = self._write(fileHandler, cleaned, self._lineNumber)
                         readNextLine = True
                         continue
                     if row + 1 == rapidsEnds:
                         rapidsEnds = 0
+                        rapidFeed = last_feed_word(line) or rapidFeed
                         cleaned = strip_feed_words(line.rstrip("\r\n")).rstrip() + "\n"
                         self._lineNumber = self._write(fileHandler, cleaned, self._lineNumber)
-                        line = "G1 (Rapid movement end)\n" # switch back to feed after the restored rapid
+                        # Switch back to feed, restoring the feed the original lines set.
+                        line = rapid_end_line(rapidFeed)
+                        rapidFeed = None
                     if self._matchLine(fileHandler, line, row, rotationAngle, preserveRotation):
                         readNextLine = True
                         continue
