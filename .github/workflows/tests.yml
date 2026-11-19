@@ -19,3 +19,4 @@ jobs:
       - run: pip install pytest
       - run: python -m pytest
       - run: python tools/build_release.py --check
+      - run: python tools/fusion_sim/run_all.py
