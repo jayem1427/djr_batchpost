@@ -15,5 +15,9 @@ def test_release_notes_have_changelog_and_install_steps():
     assert f"djr_batchpost-v{version}.zip" in notes
     assert "{version}" not in notes
     assert r"%APPDATA%\Autodesk\Autodesk Fusion 360\API\AddIns" in notes
-    # Changelog part comes first, install steps last.
-    assert notes.index("## Install / upgrade") > len(notes) // 3
+    # The version's changelog content comes first, install steps after it.
+    changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    section = changelog.split(f"## v{version}", 1)[1].split("\n## ", 1)[0]
+    first_line = next(l for l in section.splitlines()[1:] if l.strip())
+    assert notes.startswith(first_line)
+    assert notes.index("## Install / upgrade") > notes.index(first_line)
