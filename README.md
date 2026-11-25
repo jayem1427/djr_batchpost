@@ -76,7 +76,16 @@ merge: one header ─► tool comments ─► bodies (+ tool changes, A-axis mov
 <output folder>/<file name>.<post extension>
 ```
 
-The header of every file shows the version that wrote it: `(Generated with DJR Batch Post version 1.2.1)`.
+The header of every file shows the version that wrote it: `(Generated with DJR Batch Post version 1.3.0)`.
+
+## Configure DJR Batch Post
+
+In the Manufacture workspace, open **Utilities → Add-Ins → Configure DJR Batch Post** to set:
+
+- **Post processor** used when Post Combined creates an NC Program. The list shows the posts in your own libraries; tick *Include Fusion's built-in posts* to see Fusion's too. *(keep current)* leaves it unchanged.
+- **Output folder** for those NC Programs (**Browse…** to pick one).
+- **Also apply to this document's NC Program**: switches the open document's NC Program to the same post and folder.
+- **Defaults for new documents**: Restore rapid moves, Minimum rapid move distance, Rotate A-axis between setups. Documents that already have settings keep their own.
 
 ## Options reference
 
@@ -149,10 +158,10 @@ The tests stub the Fusion `adsk` API, so they run anywhere. They cover the parse
 **Releasing:** bump `"version"` in `djr_batchpost.manifest` and `PLUGIN_VERSION` in `config.py`, add a section to `CHANGELOG.md`, then push a tag:
 
 ```bash
-git tag v1.2.1 && git push origin v1.2.1
+git tag v1.3.0 && git push origin v1.3.0
 ```
 
-The *Release* workflow runs the tests, builds `djr_batchpost-v1.2.1.zip` with `tools/build_release.py`, and publishes a GitHub release with the changelog section as its notes. To build the zip locally, run `python tools/build_release.py` (it writes to `dist/`).
+The *Release* workflow runs the tests, builds `djr_batchpost-v1.3.0.zip` with `tools/build_release.py`, and publishes a GitHub release with the changelog section as its notes. To build the zip locally, run `python tools/build_release.py` (it writes to `dist/`).
 
 ### Layout
 

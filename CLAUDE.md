@@ -21,12 +21,13 @@ An Autodesk Fusion add-in (Python) that posts every operation in the chosen CAM 
 ```
 djr_batchpost.py / .manifest / .svg   entry point (run/stop), metadata, Scripts-and-Add-Ins icon
 config.py                             PLUGIN_VERSION, DEBUG (console logging; False for releases)
-commands/commands.py                  registers PostDialog, then QuickPostCommand (order matters)
+commands/commands.py                  registers PostDialog, QuickPostCommand, ConfigureCommand (order matters)
 commands/postProcessor/
   config.py                           command IDs/names, incl. QUICK_CMD_ID and QUICK_CTX_CMD_ID
   const.py                            ATTR_GROUP etc. (see invariants)
   dialog/                             the "DJR Batch Post" dialog (+ resources/ toolbar icons)
   quick_post.py                       "Post Combined" toolbar button + setup right-click entry
+  configure.py                        "Configure DJR Batch Post" (Add-Ins panel): post, output folder, defaults; apply_configuration() is the testable part
   post_runner.py                      shared run: safety prompts, post, overwrite prompt, report, remember post
   auto_program.py                     create an NC Program when the document has none (Fusion API side)
   post_memory.py                      remember/find the post processor (pure, no adsk)
@@ -107,12 +108,16 @@ Converting a move that cuts into a `G0` can crash the machine, so these rules ar
 - A command that adds **no inputs** in `commandCreated` executes immediately with no dialog. Post Combined relies on this.
 - Right-click menu: `ui.markingMenuDisplaying` → `args.selectedEntities` and `args.linearMarkingMenu.controls`. Guard against adding the same entry twice with `itemById`. Setups have `objectType == "adsk::cam::Setup"`.
 - Posts: `adsk.cam.CAMManager.get().libraryManager.postLibrary` provides `urlByLocation(LibraryLocations.X)`, `childPostConfigurations(url)` and `childFolderURLs(url)`. `PostConfiguration` has **no URL**, so a post is matched by description + vendor + extension.
+- Configure's button goes into the Manufacture workspace's Add-Ins panel. Its id is **not verified**: `configure.py` tries `CAMScriptsAddinsPanel`, then `SolidScriptsAddinsPanel`, then falls back to the Actions panel. Check where it actually appears in Fusion and fix `_PANEL_CANDIDATES` if needed.
+- `Settings.UpdateDefaults()` writes only the defaults file; the open document's settings are untouched.
 - NC Program creation: `cam.ncPrograms.createInput()` → set `displayName`, `parameters` (`nc_program_filename`, `nc_program_output_folder`, `nc_program_openInEditor`) and `operations = [setups]` → `cam.ncPrograms.add(input)`, then `program.postConfiguration = post`.
 
-## Status as of v1.2.1 (2026-11-24)
+## Status as of v1.3.0 (2026-11-24)
 
 - **Verified in the real Fusion:** both toolbar buttons appear, the setup right-click entry appears, and the add-in starts and stops cleanly.
 - **Verified only in tests and the simulation:** automatic NC Program creation and the post library search, an actual right-click post, and the issue #5 rapid rules. The first real post should be checked in a G-code viewer and air-cut.
 - **Released:** `v1.2.0` (tag at `f89c10f`), with its zip. `v1.1.0` (tag at `31eae75`) has the same code apart from the version number. The 1.2.0 changelog section lists the fixes.
 - **Branches:** only `main`. The old `djr_batchpost` and `cursor/4th-axis-without-machine-d9ab` branches were merged into it and then deleted.
+- **Configure (v1.3.0)** is verified only in tests and the simulation: where the button lands, the dialog inputs, and the folder picker still need checking in real Fusion.
+- **Open:** issue #6, posting without an NC Program.
 - The Swedish strings (`sv.json`) for the newer messages were written without a native-speaker review.
