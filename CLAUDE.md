@@ -89,7 +89,7 @@ Copy the changed files (or the unzipped `dist/` build) into the installed add-in
 - `Program.Process()` restores the NC Program's operation list afterwards. Posting changes it one group at a time.
 - Post Combined overrides grouping (Single file) and turns off *clear output folder* **for that run only**, then restores both. A single right-clicked setup temporarily sets the NC Program's file name to the setup name, then restores it.
 - Overwrite is never silent: the user is asked first. For Single file output, the check happens before anything is posted.
-- File names go through `Utils.sanitizeFilename`, which turns spaces into underscores. Comment text is sanitized too: `(` and `)` inside comments become `[` and `]`.
+- File names go through `Utils.sanitizeFilename`. It **keeps spaces** (runs of whitespace become one space) and replaces characters Windows forbids (`<>:"/\|?*`) with `_`. `tests/test_filenames.py` guards this. Comment text is sanitized too: `(` and `)` inside comments become `[` and `]`.
 
 ### Restore rapid moves: safety rules (issue #5)
 
@@ -109,7 +109,7 @@ Converting a move that cuts into a `G0` can crash the machine, so these rules ar
 - Posts: `adsk.cam.CAMManager.get().libraryManager.postLibrary` provides `urlByLocation(LibraryLocations.X)`, `childPostConfigurations(url)` and `childFolderURLs(url)`. `PostConfiguration` has **no URL**, so a post is matched by description + vendor + extension.
 - NC Program creation: `cam.ncPrograms.createInput()` → set `displayName`, `parameters` (`nc_program_filename`, `nc_program_output_folder`, `nc_program_openInEditor`) and `operations = [setups]` → `cam.ncPrograms.add(input)`, then `program.postConfiguration = post`.
 
-## Status as of v1.2.0 (2026-11-19)
+## Status as of v1.2.1 (2026-11-24)
 
 - **Verified in the real Fusion:** both toolbar buttons appear, the setup right-click entry appears, and the add-in starts and stops cleanly.
 - **Verified only in tests and the simulation:** automatic NC Program creation and the post library search, an actual right-click post, and the issue #5 rapid rules. The first real post should be checked in a G-code viewer and air-cut.

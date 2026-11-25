@@ -68,7 +68,7 @@ assert len(camp.ncPrograms) == 1
 prog = camp.ncPrograms[0]
 assert prog.name == "DJR Batch Post" and prog.postConfiguration is mypost
 assert len(prog.operations) == 2
-assert (out / "Test_Bracket.ngc").is_file(), list(out.iterdir())
+assert (out / "Test Bracket.ngc").is_file(), list(out.iterdir())
 assert "Wrote 1 file(s)" in msgs[-1][1]
 remembered = json.loads(remember_file.read_text())
 print("   remembered:", remembered)
@@ -85,7 +85,7 @@ app.activeDocument = doc
 msgs = press(config.QUICK_CMD_ID, [No])
 print("C:", msgs)
 assert camp.ncPrograms[0].postConfiguration is mypost
-assert (out / "Test_Bracket.ngc").is_file(), "remembered output folder not used"
+assert (out / "Test Bracket.ngc").is_file(), "remembered output folder not used"
 
 # D. right-click 'Bottom side' -> menu entry appears; run -> only that setup, file named after it
 ids = ui.right_click([s2])
@@ -97,17 +97,17 @@ n = len(posts)
 msgs = press(config.QUICK_CTX_CMD_ID, [No])
 print("D:", msgs, posts[n:])
 assert posts[n:] == [["Drill"]], posts[n:]
-t = (out / "Bottom_side.ngc").read_text()
+t = (out / "Bottom side.ngc").read_text()
 assert "(Drill)" in t and "(Face)" not in t
-assert camp.ncPrograms[0].parameters.itemByName("nc_program_filename").value.value == "Test_Bracket", "file name not restored"
+assert camp.ncPrograms[0].parameters.itemByName("nc_program_filename").value.value == "Test Bracket", "file name not restored"
 
 # E. right-click both setups -> one combined file with the program's name
 ui.right_click([s1, s2])
-(out / "Test_Bracket.ngc").unlink()
+(out / "Test Bracket.ngc").unlink()
 msgs = press(config.QUICK_CTX_CMD_ID, [No])
-t = (out / "Test_Bracket.ngc").read_text()
+t = (out / "Test Bracket.ngc").read_text()
 assert "(Face)" in t and "(Drill)" in t
-print("E: both setups -> Test_Bracket.ngc ok")
+print("E: both setups -> Test Bracket.ngc ok")
 
 # F. existing NC Program with a post is used as-is (no new program)
 doc, camp, s1, s2 = make_doc([F.NCProgram("Mine", out, "9000")])

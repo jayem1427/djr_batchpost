@@ -5,7 +5,7 @@
 	"description":	{
 		"":	"DJR Batch Post: post every operation in your setups into one combined G-code file (or one per setup/tool/operation). One-click Post Combined button. Works with any post-processor; built for multi-tool programs on Fusion Personal."
 	},
-	"version":	"1.2.0",
+	"version":	"1.2.1",
 	"runOnStartup":	true,
 	"supportedOS":	"windows|mac",
 	"editEnabled":	true,

@@ -47,7 +47,7 @@ Both buttons are in the **Actions** panel of the Manufacture workspace, next to 
 |---|---|---|
 | <img src="resources/branding/icon.svg" width="32"> | **DJR Batch Post** | Opens the full dialog. Here you choose the NC Program, setups, grouping, G-code options and output. Your choices are saved in the document. |
 | <img src="resources/branding/icon-quick.svg" width="32"> | **Post Combined** | Posts with no dialog. It always writes **one combined file** and uses the NC Program, folder, file name and G-code options last saved by the dialog. |
-| | **Right-click a setup → Post Combined (DJR)** | Same as Post Combined, but posts exactly the setup(s) you right-clicked. **One setup is written to a file named after the setup** (e.g. `Top_side.ngc`). Several setups go into the NC Program's file name. |
+| | **Right-click a setup → Post Combined (DJR)** | Same as Post Combined, but posts exactly the setup(s) you right-clicked. **One setup is written to a file named after the setup** (e.g. `Top side.ngc`). Several setups go into the NC Program's file name. |
 
 <p align="center">
   <img src="resources/readme/right-click-post-combined.png" alt="Right-click a setup in the CAM browser and choose Post Combined (DJR)" width="720">
@@ -76,7 +76,7 @@ merge: one header ─► tool comments ─► bodies (+ tool changes, A-axis mov
 <output folder>/<file name>.<post extension>
 ```
 
-The header of every file shows the version that wrote it: `(Generated with DJR Batch Post version 1.2.0)`.
+The header of every file shows the version that wrote it: `(Generated with DJR Batch Post version 1.2.1)`.
 
 ## Options reference
 
@@ -149,10 +149,10 @@ The tests stub the Fusion `adsk` API, so they run anywhere. They cover the parse
 **Releasing:** bump `"version"` in `djr_batchpost.manifest` and `PLUGIN_VERSION` in `config.py`, add a section to `CHANGELOG.md`, then push a tag:
 
 ```bash
-git tag v1.2.0 && git push origin v1.2.0
+git tag v1.2.1 && git push origin v1.2.1
 ```
 
-The *Release* workflow runs the tests, builds `djr_batchpost-v1.2.0.zip` with `tools/build_release.py`, and publishes a GitHub release with the changelog section as its notes. To build the zip locally, run `python tools/build_release.py` (it writes to `dist/`).
+The *Release* workflow runs the tests, builds `djr_batchpost-v1.2.1.zip` with `tools/build_release.py`, and publishes a GitHub release with the changelog section as its notes. To build the zip locally, run `python tools/build_release.py` (it writes to `dist/`).
 
 ### Layout
 

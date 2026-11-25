@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.2.1 — 2026-11-24
+
+### Changed
+- **File names keep their spaces.** A setup named `Top side` is now written as `Top side.ngc` instead of `Top_side.ngc`, and the same goes for document, operation and tool file names. Characters Windows doesn't allow in file names (`< > : " / \ | ? *`) are still replaced with `_`.
+
 ## v1.2.0 — 2026-11-19
 
 Fixes: rapids restored at every operation's entry and exit, MillenniumOS posts, and NC Programs keeping their operations.

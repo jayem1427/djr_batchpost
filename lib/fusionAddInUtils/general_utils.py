@@ -135,11 +135,13 @@ class Utils():
         if not allowUnicode:
             s = s.encode("ascii", "ignore").decode("ascii")
 
+        # Keep spaces (file names like "Top side.ngc" are fine on Windows,
+        # macOS and LinuxCNC); just turn tabs/newlines/runs into one space.
+        s = re.sub(r"\s+", " ", s)
+
         # remove forbidden chars
         s = re.sub(forbidden, replacement, s)
 
-        # Replace whitespace with single replacement
-        s = re.sub(r"\s+", replacement, s)
 
         # Collapse multiple replacements
         rep = re.escape(replacement)
