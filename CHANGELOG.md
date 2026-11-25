@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.3.0 — 2026-11-24
+
+### New
+- **Configure DJR Batch Post** (Manufacture workspace → Utilities → Add-Ins). Choose the post processor and output folder that Post Combined uses when it creates an NC Program, without editing an NC Program first. Lists the posts in your own libraries, with an option to include Fusion's built-in posts.
+  - Optionally applies the same post and folder to the open document's NC Program.
+  - Also sets the defaults for new documents: Restore rapid moves, Minimum rapid move distance, and Rotate A-axis between setups. Documents that already have settings keep them.
+
 ## v1.2.1 — 2026-11-24
 
 ### Changed

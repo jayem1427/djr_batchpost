@@ -106,3 +106,26 @@ def only_post(library, root_urls: Iterable):
         if len(found) > 1:
             return None
     return found[0] if found else None
+
+
+def list_posts(library, root_urls: Iterable, limit: int = 300) -> list:
+    """Posts found in ``root_urls`` (in order), without duplicates, capped."""
+    seen = set()
+    out = []
+    for post in iter_posts(library, root_urls):
+        key = (getattr(post, "description", ""), getattr(post, "vendor", ""), getattr(post, "extension", ""))
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(post)
+        if len(out) >= limit:
+            break
+    return out
+
+
+def post_label(post) -> str:
+    description = getattr(post, "description", "") or "(unnamed post)"
+    vendor = getattr(post, "vendor", "") or ""
+    extension = getattr(post, "extension", "") or ""
+    extra = ", ".join(x for x in (vendor, extension) if x)
+    return f"{description} ({extra})" if extra else description

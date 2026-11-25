@@ -1,6 +1,7 @@
 from __future__ import annotations
 from .postProcessor.dialog.dialog import PostDialog
 from .postProcessor.quick_post import QuickPostCommand
+from .postProcessor.configure import ConfigureCommand
 
 class Commands():
 
@@ -9,6 +10,7 @@ class Commands():
     _commands = [
         PostDialog,
         QuickPostCommand,
+        ConfigureCommand,
     ]
 
 

@@ -29,11 +29,13 @@ entry.run(None)
 ids = [c.id for c in ui.panel._controls]
 print("controls:", ids)
 from djr_batchpost.commands.postProcessor import config
-assert ids == ["IronPostProcess", config.CMD_ID, config.QUICK_CMD_ID], ids
+# The fake returns one panel for every panel id, so Configure (Add-Ins panel in
+# real Fusion) lands here too.
+assert ids == ["IronPostProcess", config.CMD_ID, config.QUICK_CMD_ID, config.CONFIG_CMD_ID], ids
 for d in ui.commandDefinitions._items.values():
     assert Path(d.resourceFolder, "16x16.png").is_file(), d.resourceFolder
     print("definition:", d.id, "|", d.name, "|", Path(d.resourceFolder).name)
-assert all(c.isPromoted for c in ui.panel._controls[1:])
+assert all(c.isPromoted for c in ui.panel._controls[1:3])
 
 tmp = Path(tempfile.mkdtemp())
 out = tmp / "out"

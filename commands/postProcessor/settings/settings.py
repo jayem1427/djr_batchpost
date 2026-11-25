@@ -121,6 +121,32 @@ class Settings(Constants, metaclass=_SettingsMeta):
             pass
 
     @classmethod
+    def Defaults(cls) -> dict:
+        """The defaults for new documents (read from the file if needed)."""
+        if not cls._default:
+            path = cls._getPath()
+            try:
+                with open(path) as file:
+                    cls._default = json.load(file)
+                cls.Update(Settings._defaultSettings, cls._default)
+            except Exception:
+                cls._default = dict(Settings._defaultSettings)
+        return dict(cls._default)
+
+    @classmethod
+    def UpdateDefaults(cls, changes: dict) -> None:
+        """Change some defaults for new documents and write the file. The
+        open document's own settings are left alone."""
+        defaults = cls.Defaults()
+        defaults.update(changes)
+        cls._default = defaults
+        try:
+            with open(cls._getPath(), "w") as file:
+                file.write(json.dumps(defaults, indent=4, sort_keys=True))
+        except Exception:
+            pass
+
+    @classmethod
     def Save(cls, attr: Attributes):
         if cls._fMustSave:
             cls.SaveDefault()

@@ -83,3 +83,10 @@ def remember(program) -> None:
             post_memory.save(post_memory.describe_post(post, program.GetOutputFolder()))
     except Exception:
         Utils.log("AutoProgram: could not remember post.", adsk.core.LogLevels.WarningLogLevel)
+
+
+def available_posts(include_fusion_library: bool) -> list:
+    """Posts to offer in Configure: your own libraries, optionally Fusion's."""
+    library = _post_library()
+    names = _ALL_LOCATIONS if include_fusion_library else _USER_LOCATIONS
+    return post_memory.list_posts(library, _location_urls(library, names))

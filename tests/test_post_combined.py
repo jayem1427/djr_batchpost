@@ -220,7 +220,8 @@ def test_commands_register_dialog_then_quick_post():
     from batch_post.commands.commands import Commands
     from batch_post.commands.postProcessor.dialog.dialog import PostDialog
     from batch_post.commands.postProcessor.quick_post import QuickPostCommand
-    assert Commands._commands == [PostDialog, QuickPostCommand]
+    from batch_post.commands.postProcessor.configure import ConfigureCommand
+    assert Commands._commands == [PostDialog, QuickPostCommand, ConfigureCommand]
 
 
 def test_icon_folders_have_fusion_icon_sizes():

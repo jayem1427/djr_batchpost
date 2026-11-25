@@ -24,3 +24,9 @@ QUICK_CMD_DESCRIPTION = ('One click: post every operation in the selected setups
 QUICK_CTX_CMD_ID = f'{COMPANY_NAME}_{ADDIN_NAME}_postCombinedSetup'
 QUICK_CTX_CMD_NAME = 'Post Combined (DJR)'
 QUICK_CTX_CMD_DESCRIPTION = 'Post the right-clicked setup(s) into one G-code file. One setup is named after the setup.'
+
+# Configure dialog (post processor, output folder, defaults)
+CONFIG_CMD_ID = f'{COMPANY_NAME}_{ADDIN_NAME}_configure'
+CONFIG_CMD_NAME = 'Configure DJR Batch Post'
+CONFIG_CMD_DESCRIPTION = ('Choose the post processor and output folder that Post Combined uses when it creates an NC Program, '
+                          'and the default G-code options for new documents.')
