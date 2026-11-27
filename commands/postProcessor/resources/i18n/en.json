@@ -221,5 +221,23 @@
       "This document has no NC Program yet, and I don't know your post processor yet.<p>Create an NC Program once with your post processor and post with DJR Batch Post. After that, Post Combined creates the NC Program for you in any document.": "This document has no NC Program yet, and I don't know your post processor yet.<p>Create an NC Program once with your post processor and post with DJR Batch Post. After that, Post Combined creates the NC Program for you in any document.",
       "Created an NC Program, but it isn't ready to post. Open DJR Batch Post to check it.": "Created an NC Program, but it isn't ready to post. Open DJR Batch Post to check it.",
       "Couldn't find the right-clicked setup. Try again.": "Couldn't find the right-clicked setup. Try again."
+    },
+
+  "post_dialog": {
+      "__meta__": {
+            "description": "Post Combined dialog (v1.4.0)."
+          },
+      "No post processor chosen yet.<p>Open Utilities > Add-Ins > Configure DJR Batch Post and pick your post processor, then try again.": "No post processor chosen yet.<p>Open Utilities > Add-Ins > Configure DJR Batch Post and pick your post processor, then try again.",
+      "Posts with <b>{post}</b> through a temporary NC Program that is removed afterwards. <b>Post options…</b> keeps an NC Program in this document so you can change post settings (e.g. 4th axis).": "Posts with <b>{post}</b> through a temporary NC Program that is removed afterwards. <b>Post options…</b> keeps an NC Program in this document so you can change post settings (e.g. 4th axis).",
+      "Posts with <b>{post}</b> using NC Program <b>{program}</b>. <b>Post options…</b> opens it to change post settings.": "Posts with <b>{post}</b> using NC Program <b>{program}</b>. <b>Post options…</b> opens it to change post settings.",
+      "Post": "Post",
+      "File": "File",
+      "Extension": "Extension",
+      "Browse…": "Browse…",
+      "Post options…": "Post options…",
+      "Save G-code as": "Save G-code as",
+      "Enter a file name.": "Enter a file name.",
+      "Include the folder, e.g. C:\\gcode\\part.": "Include the folder, e.g. C:\\gcode\\part.",
+      "NC Program <b>{program}</b> is selected in the browser and will be used for every post in this document.<p>Close this dialog, then double-click the NC Program (or right-click > Edit) to change post settings such as the 4th axis. Post again when you're done.": "NC Program <b>{program}</b> is selected in the browser and will be used for every post in this document.<p>Close this dialog, then double-click the NC Program (or right-click > Edit) to change post settings such as the 4th axis. Post again when you're done."
     }
 }

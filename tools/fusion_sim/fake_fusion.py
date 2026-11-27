@@ -170,13 +170,47 @@ def install(posts_log: list):
             self._items[id_] = d
             return d
 
+    class Input:
+        def __init__(self, id_, name, value=None, **kw):
+            self.id, self.name, self.value = id_, name, value
+            self.formattedText = kw.get("text", "")
+            self.isVisible = True
+
+    class CommandInputs:
+        def __init__(self):
+            self._items = {}
+
+        def _add(self, inp):
+            self._items[inp.id] = inp
+            return inp
+
+        def itemById(self, id_):
+            return self._items.get(id_)
+
+        def addStringValueInput(self, id_, name, value=""):
+            return self._add(Input(id_, name, value))
+
+        def addTextBoxCommandInput(self, id_, name, text, rows, readOnly):
+            return self._add(Input(id_, name, None, text=text))
+
+        def addBoolValueInput(self, id_, name, isCheckBox, resourceFolder="", initialValue=False):
+            return self._add(Input(id_, name, initialValue))
+
+        @property
+        def count(self):
+            return len(self._items)
+
     class Command:
         def __init__(self):
             self.execute = make_event("CommandEventHandler")
             self.destroy = make_event("CommandEventHandler")
             self.inputChanged = make_event("InputChangedEventHandler")
             self.validateInputs = make_event("ValidateInputsEventHandler")
-            self.inputs_created = 0
+            self.commandInputs = CommandInputs()
+            self.okButtonText = "OK"
+
+        def setDialogInitialSize(self, w, h):
+            pass
 
     class UI:
         instance = None
@@ -190,6 +224,11 @@ def install(posts_log: list):
             self.messages = []
             self.answers = []  # queue of DialogResults to return
             self.markingMenuDisplaying = make_event("MarkingMenuEventHandler")
+            self.dialog_hook = None
+            self.last_command = None
+            self.activeSelections = types.SimpleNamespace(items=[])
+            self.activeSelections.clear = lambda: self.activeSelections.items.clear()
+            self.activeSelections.add = lambda e: self.activeSelections.items.append(e)
 
         def right_click(self, entities):
             """Fire markingMenuDisplaying and return the linear menu's control ids."""
@@ -209,11 +248,30 @@ def install(posts_log: list):
             return core.DialogResults.DialogOK
 
         def run_command(self, definition):
-            """Mimic Fusion: created -> (no inputs => execute immediately) -> destroy."""
+            """
+            Mimic Fusion: created -> (no inputs => execute at once; with
+            inputs => dialog: ``dialog_hook(cmd)`` plays the user, returning
+            False for Cancel) -> validateInputs -> execute -> destroy.
+            """
             cmd = Command()
+            self.last_command = cmd
             definition.commandCreated.fire(types.SimpleNamespace(command=cmd))
-            cmd.execute.fire(types.SimpleNamespace(command=cmd))
+            run = True
+            if cmd.commandInputs.count:
+                if self.dialog_hook is not None:
+                    run = self.dialog_hook(cmd) is not False
+                v = types.SimpleNamespace(inputs=cmd.commandInputs, areInputsValid=True)
+                cmd.validateInputs.fire(v)
+                run = run and v.areInputsValid
+            if run:
+                cmd.execute.fire(types.SimpleNamespace(command=cmd))
             cmd.destroy.fire(types.SimpleNamespace(command=cmd))
+
+        def click(self, cmd, input_id):
+            """User clicks a button input inside an open dialog."""
+            inp = cmd.commandInputs.itemById(input_id)
+            inp.value = True
+            cmd.inputChanged.fire(types.SimpleNamespace(input=inp, inputs=cmd.commandInputs))
 
     # ---- document / CAM -----------------------------------------------------
     class Attributes:
@@ -320,6 +378,7 @@ def install(posts_log: list):
             p.parameters = inp.parameters
             p.operations = list(inp.operations)
             p.postConfiguration = None
+            p.deleteMe = lambda prog=p: (self.remove(prog), True)[1]
             self.append(p)
             return p
 

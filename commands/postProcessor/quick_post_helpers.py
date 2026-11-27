@@ -100,3 +100,32 @@ def program_file_name(document_name: str) -> str:
     import re
     name = re.sub(r"\s+v\d+$", "", (document_name or "").strip())
     return name or "program"
+
+
+def join_target(folder, name: str, path_cls=Path) -> str:
+    """Text for the File field: folder + name, no extension."""
+    return str(path_cls(folder) / name) if folder else name
+
+
+def split_target(text: str, extension: str | None, sanitize, path_cls=Path) -> tuple:
+    """
+    Parse the File field into (folder, name, error).
+
+    Accepts quotes around the path and an optional trailing ``extension``.
+    ``sanitize`` cleans the name (spaces kept, forbidden characters -> _).
+    Exactly one of (folder, name) / error is set.
+    """
+    raw = (text or "").strip().strip('"').strip()
+    if not raw or raw.endswith(("\\", "/")):
+        return None, None, "Enter a file name."
+    path = path_cls(raw)
+    name = path.name
+    if extension and name.lower().endswith(extension.lower()):
+        name = name[: -len(extension)]
+    folder = path.parent
+    if str(folder) in ("", ".") or not (folder.is_absolute() or str(folder).startswith("\\\\")):
+        return None, None, "Include the folder, e.g. C:\\gcode\\part."
+    clean = sanitize(name).strip() if name else ""
+    if not clean:
+        return None, None, "Enter a file name."
+    return folder, clean, None

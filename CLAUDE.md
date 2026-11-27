@@ -27,6 +27,7 @@ commands/postProcessor/
   const.py                            ATTR_GROUP etc. (see invariants)
   dialog/                             the "DJR Batch Post" dialog (+ resources/ toolbar icons)
   quick_post.py                       "Post Combined" toolbar button + setup right-click entry
+  quick_post_helpers.py               (also) File-field parsing: join_target / split_target
   configure.py                        "Configure DJR Batch Post" (Add-Ins panel): post, output folder, defaults; apply_configuration() is the testable part
   post_runner.py                      shared run: safety prompts, post, overwrite prompt, report, remember post
   auto_program.py                     create an NC Program when the document has none (Fusion API side)
@@ -88,7 +89,9 @@ Copy the changed files (or the unzipped `dist/` build) into the installed add-in
 - `Settings.Set()` changes only the document copy. The defaults file is written by `SaveDefault()` (the *Save as default settings* button), or once on first run.
 - `Settings.Load()` on a document with no saved settings starts from the defaults, never from the previously used document.
 - `Program.Process()` restores the NC Program's operation list afterwards. Posting changes it one group at a time.
-- Post Combined overrides grouping (Single file) and turns off *clear output folder* **for that run only**, then restores both. A single right-clicked setup temporarily sets the NC Program's file name to the setup name, then restores it.
+- Post Combined overrides grouping (Single file), *clear output folder*, the NC Program's file name and output folder **for that run only**, then restores all of them. The File line in its dialog decides name and folder.
+- A **temporary** NC Program (`DJR Batch Post (temporary)`) is created only when the document has no usable one, and is always deleted in `finally`, after the success message. *Post options…* creates a **persistent** `DJR Batch Post` program instead, which later posts reuse.
+- The Post Combined dialog never creates an NC Program just by opening; only Post (temporary) or Post options… (persistent) do.
 - Overwrite is never silent: the user is asked first. For Single file output, the check happens before anything is posted.
 - File names go through `Utils.sanitizeFilename`. It **keeps spaces** (runs of whitespace become one space) and replaces characters Windows forbids (`<>:"/\|?*`) with `_`. `tests/test_filenames.py` guards this. Comment text is sanitized too: `(` and `)` inside comments become `[` and `]`.
 
@@ -105,19 +108,22 @@ Converting a move that cuts into a `G0` can crash the machine, so these rules ar
 
 ## Fusion API notes (checked against Autodesk docs)
 
-- A command that adds **no inputs** in `commandCreated` executes immediately with no dialog. Post Combined relies on this.
+- A command that adds **no inputs** in `commandCreated` executes immediately with no dialog. Post Combined uses this only to bail out (plan is None); normally it adds inputs and shows its dialog, with `okButtonText = "Post"` and `validateInputs` gating Post.
+- `CAM.postProcess` (post without an NC Program) is **retired** (Sept 2025). Posting must go through `NCProgram.postProcess()`.
+- Browse uses `ui.createFileDialog()` + `showSave()`. **Not verified in Fusion:** whether an input-changed handler may open it while the command dialog is open.
+- Post options… can't open Fusion's NC Program edit window via the API; it selects the program (`ui.activeSelections`) and tells the user to double-click it. A follow-up could find the built-in edit command id in real Fusion.
 - Right-click menu: `ui.markingMenuDisplaying` → `args.selectedEntities` and `args.linearMarkingMenu.controls`. Guard against adding the same entry twice with `itemById`. Setups have `objectType == "adsk::cam::Setup"`.
 - Posts: `adsk.cam.CAMManager.get().libraryManager.postLibrary` provides `urlByLocation(LibraryLocations.X)`, `childPostConfigurations(url)` and `childFolderURLs(url)`. `PostConfiguration` has **no URL**, so a post is matched by description + vendor + extension.
 - Configure's button goes into the Manufacture workspace's Add-Ins panel. Its id is **not verified**: `configure.py` tries `CAMScriptsAddinsPanel`, then `SolidScriptsAddinsPanel`, then falls back to the Actions panel. Check where it actually appears in Fusion and fix `_PANEL_CANDIDATES` if needed.
 - `Settings.UpdateDefaults()` writes only the defaults file; the open document's settings are untouched.
 - NC Program creation: `cam.ncPrograms.createInput()` → set `displayName`, `parameters` (`nc_program_filename`, `nc_program_output_folder`, `nc_program_openInEditor`) and `operations = [setups]` → `cam.ncPrograms.add(input)`, then `program.postConfiguration = post`.
 
-## Status as of v1.3.0 (2026-11-24)
+## Status as of v1.4.0 (2026-11-26)
 
 - **Verified in the real Fusion:** both toolbar buttons appear, the setup right-click entry appears, and the add-in starts and stops cleanly.
 - **Verified only in tests and the simulation:** automatic NC Program creation and the post library search, an actual right-click post, and the issue #5 rapid rules. The first real post should be checked in a G-code viewer and air-cut.
-- **Released:** `v1.2.0` (tag at `f89c10f`), with its zip. `v1.1.0` (tag at `31eae75`) has the same code apart from the version number. The 1.2.0 changelog section lists the fixes.
+- **Released:** up to `v1.3.0` (Configure). `v1.4.0` is on `main`, ready to tag.
 - **Branches:** only `main`. The old `djr_batchpost` and `cursor/4th-axis-without-machine-d9ab` branches were merged into it and then deleted.
-- **Configure (v1.3.0)** is verified only in tests and the simulation: where the button lands, the dialog inputs, and the folder picker still need checking in real Fusion.
-- **Open:** issue #6, posting without an NC Program.
+- **Configure (v1.3.0)** is verified only in tests and the simulation: where the button lands, the dialog inputs, and the folder picker still need checking in real Fusion. Its *apply to this document* path had a bug (str passed to `SetOutputFolder`), fixed in 1.4.0.
+- **v1.4.0 (issues #6, #7)** is verified only in tests and the simulation: the Post Combined dialog layout, Browse (Save As), Post options… selection, and creating + deleting the temporary NC Program (incl. undo history) need checking in real Fusion.
 - The Swedish strings (`sv.json`) for the newer messages were written without a native-speaker review.

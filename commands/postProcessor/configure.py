@@ -10,6 +10,7 @@ back to the Actions panel if that panel can't be found).
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 import adsk.core
 import adsk.cam
@@ -60,7 +61,7 @@ def apply_configuration(post, output_folder: str, program, defaults: dict) -> li
         if post is not None:
             program._program.postConfiguration = post
         if output_folder:
-            program.SetOutputFolder(output_folder)
+            program.SetOutputFolder(Path(output_folder))
         changed.append(f"NC Program '{program.name}' in this document")
     return changed
 
@@ -70,7 +71,7 @@ class ConfigureCommand:
     _local_handlers = []
     _posts: list = []
     _program = None  # Programs wrapper of the open document, if any
-    _ICON_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dialog', 'resources', '')
+    _ICON_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dialog', 'resources_configure', '')
 
     # ------------------------------------------------------------------ setup
     @classmethod

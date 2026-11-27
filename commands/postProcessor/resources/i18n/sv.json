@@ -241,5 +241,23 @@
       "This document has no NC Program yet, and I don't know your post processor yet.<p>Create an NC Program once with your post processor and post with DJR Batch Post. After that, Post Combined creates the NC Program for you in any document.": "Dokumentet har inget NC-program ännu, och din postprocessor är inte känd ännu.<p>Skapa ett NC-program en gång med din postprocessor och efterbehandla med DJR Batch Post. Därefter skapar Post Combined NC-programmet åt dig i alla dokument.",
       "Created an NC Program, but it isn't ready to post. Open DJR Batch Post to check it.": "Ett NC-program skapades men är inte redo. Öppna DJR Batch Post och kontrollera det.",
       "Couldn't find the right-clicked setup. Try again.": "Hittade inte den högerklickade setupen. Försök igen."
+    },
+
+  "post_dialog": {
+      "__meta__": {
+            "description": "Post Combined dialog (v1.4.0)."
+          },
+      "No post processor chosen yet.<p>Open Utilities > Add-Ins > Configure DJR Batch Post and pick your post processor, then try again.": "Ingen postprocessor vald ännu.<p>Öppna Verktyg > Tillägg > Configure DJR Batch Post och välj din postprocessor, försök sedan igen.",
+      "Posts with <b>{post}</b> through a temporary NC Program that is removed afterwards. <b>Post options…</b> keeps an NC Program in this document so you can change post settings (e.g. 4th axis).": "Efterbehandlar med <b>{post}</b> via ett tillfälligt NC-program som tas bort efteråt. <b>Post options…</b> behåller ett NC-program i dokumentet så att du kan ändra postinställningar (t.ex. 4:e axeln).",
+      "Posts with <b>{post}</b> using NC Program <b>{program}</b>. <b>Post options…</b> opens it to change post settings.": "Efterbehandlar med <b>{post}</b> via NC-programmet <b>{program}</b>. <b>Post options…</b> öppnar det för att ändra postinställningar.",
+      "Post": "Efterbehandla",
+      "File": "Fil",
+      "Extension": "Filändelse",
+      "Browse…": "Bläddra…",
+      "Post options…": "Postinställningar…",
+      "Save G-code as": "Spara G-kod som",
+      "Enter a file name.": "Ange ett filnamn.",
+      "Include the folder, e.g. C:\\gcode\\part.": "Ange mappen, t.ex. C:\\gcode\\part.",
+      "NC Program <b>{program}</b> is selected in the browser and will be used for every post in this document.<p>Close this dialog, then double-click the NC Program (or right-click > Edit) to change post settings such as the 4th axis. Post again when you're done.": "NC-programmet <b>{program}</b> är markerat i webbläsaren och används för varje efterbehandling i dokumentet.<p>Stäng dialogen, dubbelklicka sedan på NC-programmet (eller högerklicka > Redigera) för att ändra postinställningar som 4:e axeln. Efterbehandla igen när du är klar."
     }
 }

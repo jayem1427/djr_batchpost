@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.4.0 — 2026-11-26
+
+### New
+- **Post Combined dialog** ([#7](https://github.com/jayem1427/djr_batchpost/issues/7)). Post Combined (toolbar and right-click) now asks before posting:
+  - **File**: folder and name on one line, pre-filled (one right-clicked setup → its name). Edit it, or **Browse…** for the Save As window. New folders are created.
+  - **Post options…**: keeps an NC Program in the document and selects it, so Fusion's own post settings (4th axis and so on) are one double-click away.
+  - **Post** / **Cancel**. Post stays greyed out until the File line has a folder and a name.
+- **No more leftover NC Programs** ([#6](https://github.com/jayem1427/djr_batchpost/issues/6)). Without an NC Program in the document, Post Combined posts through a temporary one and deletes it afterwards. (Fusion's API can't post without an NC Program at all: the call that did was retired in September 2025.)
+- **New icons.** The "merge" icon: three toolpaths becoming one file. Dark for DJR Batch Post, orange for Post Combined, sliders for Configure.
+
+### Fixed
+- Configure: **Also apply to this document's NC Program** failed when an output folder was set.
+
+### Changed
+- When no post-processor has been chosen yet, Post Combined points you to Configure DJR Batch Post.
+
 ## v1.3.0 — 2026-11-24
 
 ### New

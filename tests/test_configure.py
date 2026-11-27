@@ -38,6 +38,7 @@ class _Program:
         self.folder = None
 
     def SetOutputFolder(self, folder):
+        folder.as_posix()  # the real wrapper needs a Path
         self.folder = folder
 
 
@@ -80,7 +81,7 @@ def test_applies_to_document_program(files):
     post = _post()
     configure.apply_configuration(post, r"C:\gcode", program, {})
     assert program._program.postConfiguration is post
-    assert program.folder == r"C:\gcode"
+    assert str(program.folder) == r"C:\gcode"
 
 
 def test_post_label():

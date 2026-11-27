@@ -13,7 +13,8 @@ from . import post_memory
 from .parameters import Parameters
 from ...lib.fusionAddInUtils.general_utils import Utils
 
-AUTO_PROGRAM_NAME = "DJR Batch Post"
+AUTO_PROGRAM_NAME = "DJR Batch Post"            # kept: created by "Post options..."
+TEMP_PROGRAM_NAME = "DJR Batch Post (temporary)"  # deleted after each post
 
 
 def _post_library():
@@ -59,10 +60,10 @@ def _set(params, name: str, value) -> None:
         param.value.value = value
 
 
-def create_program(cam: adsk.cam.CAM, post, info: dict, file_name: str):
+def create_program(cam: adsk.cam.CAM, post, info: dict, file_name: str, display_name: str = AUTO_PROGRAM_NAME):
     """Add an NC Program covering every setup, with ``post`` attached."""
     ncInput = cam.ncPrograms.createInput()
-    ncInput.displayName = AUTO_PROGRAM_NAME
+    ncInput.displayName = display_name
     params = ncInput.parameters
     if info.get("outputFolder"):
         _set(params, Parameters.OUTPUT_FOLDER, info["outputFolder"])
@@ -90,3 +91,11 @@ def available_posts(include_fusion_library: bool) -> list:
     library = _post_library()
     names = _ALL_LOCATIONS if include_fusion_library else _USER_LOCATIONS
     return post_memory.list_posts(library, _location_urls(library, names))
+
+
+def delete_program(program) -> None:
+    """Delete an NC Program (the temporary one); never raises."""
+    try:
+        program.deleteMe()
+    except Exception as e:
+        Utils.log(f"AutoProgram: could not delete temporary NC Program: {e}", adsk.core.LogLevels.WarningLogLevel)

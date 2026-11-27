@@ -45,49 +45,72 @@ def make_doc(programs=()):
     return F.Document(camp, "Test Bracket v7"), camp, s1, s2
 
 
-def press(cmd_id, answers):
+def press(cmd_id, answers, hook=None):
+    """Click a command. ``hook(cmd)`` plays the user in the dialog (edit inputs,
+    click buttons); return False from it to press Cancel. Default: press Post."""
     ui.messages.clear()
     ui.answers = list(answers)
+    ui.dialog_hook = hook
     ui.commandDefinitions.itemById(cmd_id).execute()
+    ui.dialog_hook = None
     return [(t, m.split("<")[0][:100]) for t, m, _ in ui.messages]
 
 
-# A. no NC Program, nothing remembered, two posts in the user's library -> asks, creates nothing
+def file_field(cmd):
+    return cmd.commandInputs.itemById("djr_qp_file")
+
+
+def set_file(path):
+    def hook(cmd):
+        file_field(cmd).value = str(path)
+    return hook
+
+
+# A. no NC Program, nothing remembered, two posts in the user's library -> explains, no dialog, nothing created
 LIB.tree = {"loc0://": {"posts": [mypost, types.SimpleNamespace(description="Other", vendor="X", extension=".nc")]}}
 doc, camp, s1, s2 = make_doc()
 app.activeDocument = doc
 msgs = press(config.QUICK_CMD_ID, [])
 print("A:", msgs)
-assert "don't know your post processor yet" in msgs[0][1] and len(camp.ncPrograms) == 0
+assert "No post processor chosen yet" in msgs[0][1] and len(camp.ncPrograms) == 0
+assert ui.last_command.commandInputs.count == 0, "dialog shown although posting is impossible"
 
-# B. exactly one post in the user's library (in a subfolder) -> NC Program created, combined file named after the doc
+# B. exactly one post in the user's library (in a subfolder) -> dialog pre-filled with the doc name,
+#    temporary NC Program created and deleted again
 LIB.tree = {"loc0://": {"folders": ["loc0://shop"]}, "loc0://shop": {"posts": [mypost]}}
-msgs = press(config.QUICK_CMD_ID, [No])
-print("B:", msgs)
-assert len(camp.ncPrograms) == 1
-prog = camp.ncPrograms[0]
-assert prog.name == "DJR Batch Post" and prog.postConfiguration is mypost
-assert len(prog.operations) == 2
+seen = {}
+def hook_b(cmd):
+    seen["file"] = file_field(cmd).value
+    seen["ok"] = cmd.okButtonText
+    seen["ext"] = cmd.commandInputs.itemById("djr_qp_ext").formattedText
+    seen["programs_while_open"] = len(camp.ncPrograms)
+    file_field(cmd).value = str(out / "Test Bracket")
+msgs = press(config.QUICK_CMD_ID, [No], hook_b)
+print("B:", msgs, seen)
+assert seen["file"].endswith("Test Bracket") and seen["ok"] == "Post" and seen["ext"] == ".ngc"
+assert seen["programs_while_open"] == 0, "dialog must not create an NC Program"
+assert len(camp.ncPrograms) == 0, "temporary NC Program not deleted"
 assert (out / "Test Bracket.ngc").is_file(), list(out.iterdir())
 assert "Wrote 1 file(s)" in msgs[-1][1]
 remembered = json.loads(remember_file.read_text())
 print("   remembered:", remembered)
 assert remembered["description"] == "LemonTart LinuxCNC" and remembered["outputFolder"] == str(out)
+assert json.loads(doc.attributes.itemByName("BatchPost_Post_Processor", "settings").value)["ncProgram"] != "DJR Batch Post (temporary)"
 
-# C. new document, remembered post now found among many (Fusion library) -> created automatically
+# C. new document, remembered post found among many (Fusion library); remembered folder pre-filled
 LIB.tree = {"loc0://": {"posts": [types.SimpleNamespace(description="A", vendor="A", extension=".nc"),
                                   types.SimpleNamespace(description="B", vendor="B", extension=".nc")]},
             "loc5://": {"posts": [mypost]}}
 shutil.rmtree(out); out.mkdir()
-F.DEFAULT_OUT[0] = tmp / "somewhere-else"  # Fusion default differs; remembered folder must win
+F.DEFAULT_OUT[0] = tmp / "somewhere-else"
 doc, camp, s1, s2 = make_doc()
 app.activeDocument = doc
 msgs = press(config.QUICK_CMD_ID, [No])
 print("C:", msgs)
-assert camp.ncPrograms[0].postConfiguration is mypost
 assert (out / "Test Bracket.ngc").is_file(), "remembered output folder not used"
+assert len(camp.ncPrograms) == 0
 
-# D. right-click 'Bottom side' -> menu entry appears; run -> only that setup, file named after it
+# D. right-click 'Bottom side' -> file named after the setup, only that setup posted
 ids = ui.right_click([s2])
 print("D menu:", ids)
 assert config.QUICK_CTX_CMD_ID in ids
@@ -99,24 +122,57 @@ print("D:", msgs, posts[n:])
 assert posts[n:] == [["Drill"]], posts[n:]
 t = (out / "Bottom side.ngc").read_text()
 assert "(Drill)" in t and "(Face)" not in t
-assert camp.ncPrograms[0].parameters.itemByName("nc_program_filename").value.value == "Test Bracket", "file name not restored"
 
-# E. right-click both setups -> one combined file with the program's name
+# E. right-click both setups -> one combined file named after the document
 ui.right_click([s1, s2])
 (out / "Test Bracket.ngc").unlink()
-msgs = press(config.QUICK_CTX_CMD_ID, [No])
+press(config.QUICK_CTX_CMD_ID, [No])
 t = (out / "Test Bracket.ngc").read_text()
 assert "(Face)" in t and "(Drill)" in t
 print("E: both setups -> Test Bracket.ngc ok")
 
-# F. existing NC Program with a post is used as-is (no new program)
+# F. edited name + new folder (created on the fly), typed extension dropped
+newdir = tmp / "jobs" / "1042"
+ui.right_click([s1])
+press(config.QUICK_CTX_CMD_ID, [No], set_file(newdir / "Reducer rev B.ngc"))
+assert (newdir / "Reducer rev B.ngc").is_file(), list(newdir.parent.rglob("*"))
+assert not (out / "Top side.ngc").exists()
+print("F: edited name/folder ok")
+
+# G. Cancel posts nothing; an invalid file blocks Post
+n = len(posts)
+press(config.QUICK_CMD_ID, [], lambda cmd: False)
+press(config.QUICK_CMD_ID, [], set_file("no folder"))
+assert len(posts) == n and len(camp.ncPrograms) == 0
+print("G: cancel/invalid ok")
+
+# H. Post options... keeps a persistent NC Program, selects it, later posts use it
+def hook_h(cmd):
+    ui.click(cmd, "djr_qp_options")
+    return False  # user closes the dialog to edit the NC Program
+msgs = press(config.QUICK_CMD_ID, [], hook_h)
+print("H:", msgs)
+assert [p.name for p in camp.ncPrograms] == ["DJR Batch Post"]
+assert ui.activeSelections.items == [camp.ncPrograms[0]]
+assert "is selected in the browser" in ui.messages[-1][1]
+press(config.QUICK_CMD_ID, [No])
+assert [p.name for p in camp.ncPrograms] == ["DJR Batch Post"], "persistent program deleted"
+# F's folder is now the remembered last-used folder, so posts default there.
+assert (newdir / "Test Bracket.ngc").is_file()
+
+# I. existing NC Program: used as-is; its file name and folder are restored after an edited post
 doc, camp, s1, s2 = make_doc([F.NCProgram("Mine", out, "9000")])
 app.activeDocument = doc
 press(config.QUICK_CMD_ID, [No])
 assert len(camp.ncPrograms) == 1 and (out / "9000.ngc").is_file()
-print("F: existing program used")
+press(config.QUICK_CMD_ID, [No], set_file(newdir / "other"))
+p = camp.ncPrograms[0].parameters
+assert (newdir / "other.ngc").is_file()
+assert p.itemByName("nc_program_filename").value.value == "9000"
+assert p.itemByName("nc_program_output_folder").value.value in (str(out), out.as_posix())
+print("I: existing program used and restored")
 
-# G. stop removes buttons, definitions and the right-click hook
+# J. stop removes buttons, definitions and the right-click hook
 entry.stop(None)
 assert not ui.commandDefinitions._items and ui.markingMenuDisplaying.handlers == []
 assert [c.id for c in ui.panel._controls] == ["IronPostProcess"]

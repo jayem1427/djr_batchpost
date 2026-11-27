@@ -227,7 +227,8 @@ def test_commands_register_dialog_then_quick_post():
 def test_icon_folders_have_fusion_icon_sizes():
     from batch_post.commands.postProcessor.dialog.dialog import PostDialog
     from batch_post.commands.postProcessor.quick_post import QuickPostCommand
-    for folder in (PostDialog._ICON_FOLDER, QuickPostCommand._ICON_FOLDER):
+    from batch_post.commands.postProcessor.configure import ConfigureCommand
+    for folder in (PostDialog._ICON_FOLDER, QuickPostCommand._ICON_FOLDER, ConfigureCommand._ICON_FOLDER):
         for name in ("16x16.png", "32x32.png", "64x64.png", "16x16@2x.png", "32x32@2x.png"):
             assert (Path(folder) / name).is_file(), f"{folder}{name}"
 
