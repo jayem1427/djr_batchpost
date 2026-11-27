@@ -168,4 +168,15 @@ assert Settings(Settings.OVERWRITE_FILES) is False
 entry.stop(None)
 assert [c.id for c in ui.panel._controls] == ["IronPostProcess"]
 assert not ui.commandDefinitions._items
+
+# --- 9. stop forgets the add-in's submodules, so Stop/Run in Fusion loads updated code ---
+loaded = [n for n in sys.modules if n.startswith("djr_batchpost.")]
+assert loaded == ["djr_batchpost.djr_batchpost"], loaded
+assert "djr_batchpost" in sys.modules                  # the package itself stays
+entry = importlib.import_module("djr_batchpost.djr_batchpost")
+importlib.reload(entry)                                 # what Fusion does on Run
+entry.run(None)
+assert any(c.id == config.QUICK_CMD_ID for c in ui.panel._controls), "Run after Stop must re-add the buttons"
+entry.stop(None)
+print("9 stop/run reload ok")
 print("\nALL SIMULATION CHECKS PASSED")

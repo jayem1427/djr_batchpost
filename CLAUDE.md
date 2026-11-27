@@ -78,6 +78,7 @@ A tag that doesn't match the code version makes the workflow fail without upload
 ## Installing a dev build on the owner's PC
 
 Copy the changed files (or the unzipped `dist/` build) into the installed add-in folder. Then reload: in Fusion, open **Utilities → Add-Ins → Scripts and Add-Ins** (Shift+S) and toggle **djr_batchpost** off and on, or restart Fusion.
+- Toggling reloads the code only from v1.4.0 on: `djr_batchpost.py` drops the add-in's cached modules (matched by file location, namespace packages by `__path__`) on import and on `stop`. Updating *from* an older version still needs one Fusion restart, because the old entry file is what's loaded. `sim_core.py` step 9 guards this.
 
 - Starting the add-in closes the Scripts and Add-Ins dialog. That's expected (`PostDialog.start` resets the active command).
 - The version shown in that list is cached until Fusion restarts.

@@ -11,6 +11,7 @@
 - **New icons.** The "merge" icon: three toolpaths becoming one file. Dark for DJR Batch Post, orange for Post Combined, sliders for Configure.
 
 ### Fixed
+- **Updates now load with a Stop/Run.** Fusion keeps one Python session, and switching the add-in off and on in Scripts and Add-Ins kept running the old code until Fusion was restarted. Stopping the add-in now drops its cached modules, so the next Run loads the installed files.
 - Configure: **Also apply to this document's NC Program** failed when an output folder was set.
 
 ### Changed
